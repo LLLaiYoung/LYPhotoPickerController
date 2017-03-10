@@ -1,0 +1,465 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		83277D571E72BA7E00752CCF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277D561E72BA7E00752CCF /* main.m */; };
+		83277D5A1E72BA7E00752CCF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277D591E72BA7E00752CCF /* AppDelegate.m */; };
+		83277D5D1E72BA7E00752CCF /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277D5C1E72BA7E00752CCF /* ViewController.m */; };
+		83277D601E72BA7E00752CCF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 83277D5E1E72BA7E00752CCF /* Main.storyboard */; };
+		83277D621E72BA7E00752CCF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83277D611E72BA7E00752CCF /* Assets.xcassets */; };
+		83277D651E72BA7E00752CCF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 83277D631E72BA7E00752CCF /* LaunchScreen.storyboard */; };
+		83277DC41E72CEBF00752CCF /* UIView+LYPhotoPicker.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DA51E72CEBF00752CCF /* UIView+LYPhotoPicker.m */; };
+		83277DC51E72CEBF00752CCF /* UIViewController+LYPhotoPicker.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DA71E72CEBF00752CCF /* UIViewController+LYPhotoPicker.m */; };
+		83277DC61E72CEBF00752CCF /* LYPhotoBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DAA1E72CEBF00752CCF /* LYPhotoBrowserViewController.m */; };
+		83277DC71E72CEBF00752CCF /* LYPhotoListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DAC1E72CEBF00752CCF /* LYPhotoListViewController.m */; };
+		83277DC81E72CEBF00752CCF /* LYPhotoPickerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DAE1E72CEBF00752CCF /* LYPhotoPickerController.m */; };
+		83277DC91E72CEBF00752CCF /* LYPhotoSmallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DB01E72CEBF00752CCF /* LYPhotoSmallViewController.m */; };
+		83277DCA1E72CEBF00752CCF /* LYGCDQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DB41E72CEBF00752CCF /* LYGCDQueue.m */; };
+		83277DCB1E72CEBF00752CCF /* LYGCDSemaphore.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DB61E72CEBF00752CCF /* LYGCDSemaphore.m */; };
+		83277DCC1E72CEBF00752CCF /* LYPhotoHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DB91E72CEBF00752CCF /* LYPhotoHelper.m */; };
+		83277DCD1E72CEBF00752CCF /* LYPhotoBrowserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DBD1E72CEBF00752CCF /* LYPhotoBrowserCell.m */; };
+		83277DCE1E72CEBF00752CCF /* LYPhotoBrowserScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DBF1E72CEBF00752CCF /* LYPhotoBrowserScrollView.m */; };
+		83277DCF1E72CEBF00752CCF /* LYPhotoListCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DC11E72CEBF00752CCF /* LYPhotoListCell.m */; };
+		83277DD01E72CEBF00752CCF /* LYPhotoSmallCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DC31E72CEBF00752CCF /* LYPhotoSmallCell.m */; };
+		83277DD41E72E2B800752CCF /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DD31E72E2B800752CCF /* MBProgressHUD.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		83277D521E72BA7E00752CCF /* LYPhotoPickerController.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LYPhotoPickerController.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		83277D561E72BA7E00752CCF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		83277D581E72BA7E00752CCF /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		83277D591E72BA7E00752CCF /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		83277D5B1E72BA7E00752CCF /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		83277D5C1E72BA7E00752CCF /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		83277D5F1E72BA7E00752CCF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		83277D611E72BA7E00752CCF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		83277D641E72BA7E00752CCF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		83277D661E72BA7E00752CCF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		83277DA31E72CEBF00752CCF /* LYPhotoPickerCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYPhotoPickerCategory.h; sourceTree = "<group>"; };
+		83277DA41E72CEBF00752CCF /* UIView+LYPhotoPicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+LYPhotoPicker.h"; sourceTree = "<group>"; };
+		83277DA51E72CEBF00752CCF /* UIView+LYPhotoPicker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+LYPhotoPicker.m"; sourceTree = "<group>"; };
+		83277DA61E72CEBF00752CCF /* UIViewController+LYPhotoPicker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIViewController+LYPhotoPicker.h"; sourceTree = "<group>"; };
+		83277DA71E72CEBF00752CCF /* UIViewController+LYPhotoPicker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+LYPhotoPicker.m"; sourceTree = "<group>"; };
+		83277DA91E72CEBF00752CCF /* LYPhotoBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYPhotoBrowserViewController.h; sourceTree = "<group>"; };
+		83277DAA1E72CEBF00752CCF /* LYPhotoBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LYPhotoBrowserViewController.m; sourceTree = "<group>"; };
+		83277DAB1E72CEBF00752CCF /* LYPhotoListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYPhotoListViewController.h; sourceTree = "<group>"; };
+		83277DAC1E72CEBF00752CCF /* LYPhotoListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LYPhotoListViewController.m; sourceTree = "<group>"; };
+		83277DAD1E72CEBF00752CCF /* LYPhotoPickerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYPhotoPickerController.h; sourceTree = "<group>"; };
+		83277DAE1E72CEBF00752CCF /* LYPhotoPickerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LYPhotoPickerController.m; sourceTree = "<group>"; };
+		83277DAF1E72CEBF00752CCF /* LYPhotoSmallViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYPhotoSmallViewController.h; sourceTree = "<group>"; };
+		83277DB01E72CEBF00752CCF /* LYPhotoSmallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LYPhotoSmallViewController.m; sourceTree = "<group>"; };
+		83277DB21E72CEBF00752CCF /* LYGCD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYGCD.h; sourceTree = "<group>"; };
+		83277DB31E72CEBF00752CCF /* LYGCDQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYGCDQueue.h; sourceTree = "<group>"; };
+		83277DB41E72CEBF00752CCF /* LYGCDQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LYGCDQueue.m; sourceTree = "<group>"; };
+		83277DB51E72CEBF00752CCF /* LYGCDSemaphore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYGCDSemaphore.h; sourceTree = "<group>"; };
+		83277DB61E72CEBF00752CCF /* LYGCDSemaphore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LYGCDSemaphore.m; sourceTree = "<group>"; };
+		83277DB81E72CEBF00752CCF /* LYPhotoHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYPhotoHelper.h; sourceTree = "<group>"; };
+		83277DB91E72CEBF00752CCF /* LYPhotoHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LYPhotoHelper.m; sourceTree = "<group>"; };
+		83277DBA1E72CEBF00752CCF /* LYPhotoMacro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYPhotoMacro.h; sourceTree = "<group>"; };
+		83277DBC1E72CEBF00752CCF /* LYPhotoBrowserCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYPhotoBrowserCell.h; sourceTree = "<group>"; };
+		83277DBD1E72CEBF00752CCF /* LYPhotoBrowserCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LYPhotoBrowserCell.m; sourceTree = "<group>"; };
+		83277DBE1E72CEBF00752CCF /* LYPhotoBrowserScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYPhotoBrowserScrollView.h; sourceTree = "<group>"; };
+		83277DBF1E72CEBF00752CCF /* LYPhotoBrowserScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LYPhotoBrowserScrollView.m; sourceTree = "<group>"; };
+		83277DC01E72CEBF00752CCF /* LYPhotoListCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYPhotoListCell.h; sourceTree = "<group>"; };
+		83277DC11E72CEBF00752CCF /* LYPhotoListCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LYPhotoListCell.m; sourceTree = "<group>"; };
+		83277DC21E72CEBF00752CCF /* LYPhotoSmallCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LYPhotoSmallCell.h; sourceTree = "<group>"; };
+		83277DC31E72CEBF00752CCF /* LYPhotoSmallCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LYPhotoSmallCell.m; sourceTree = "<group>"; };
+		83277DD21E72E2B800752CCF /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
+		83277DD31E72E2B800752CCF /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		83277D4F1E72BA7E00752CCF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		83277D491E72BA7E00752CCF = {
+			isa = PBXGroup;
+			children = (
+				83277D541E72BA7E00752CCF /* LYPhotoPickerController */,
+				83277D531E72BA7E00752CCF /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		83277D531E72BA7E00752CCF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				83277D521E72BA7E00752CCF /* LYPhotoPickerController.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		83277D541E72BA7E00752CCF /* LYPhotoPickerController */ = {
+			isa = PBXGroup;
+			children = (
+				83277DA11E72CEBF00752CCF /* LYPhotoPicker */,
+				83277D581E72BA7E00752CCF /* AppDelegate.h */,
+				83277D591E72BA7E00752CCF /* AppDelegate.m */,
+				83277D5B1E72BA7E00752CCF /* ViewController.h */,
+				83277D5C1E72BA7E00752CCF /* ViewController.m */,
+				83277D5E1E72BA7E00752CCF /* Main.storyboard */,
+				83277D611E72BA7E00752CCF /* Assets.xcassets */,
+				83277D631E72BA7E00752CCF /* LaunchScreen.storyboard */,
+				83277D661E72BA7E00752CCF /* Info.plist */,
+				83277D551E72BA7E00752CCF /* Supporting Files */,
+			);
+			path = LYPhotoPickerController;
+			sourceTree = "<group>";
+		};
+		83277D551E72BA7E00752CCF /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				83277D561E72BA7E00752CCF /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		83277DA11E72CEBF00752CCF /* LYPhotoPicker */ = {
+			isa = PBXGroup;
+			children = (
+				83277DD11E72E2B800752CCF /* Vendor */,
+				83277DB11E72CEBF00752CCF /* LYGCD */,
+				83277DA21E72CEBF00752CCF /* Category */,
+				83277DA81E72CEBF00752CCF /* Controllers */,
+				83277DB71E72CEBF00752CCF /* Models */,
+				83277DBB1E72CEBF00752CCF /* Views */,
+			);
+			path = LYPhotoPicker;
+			sourceTree = "<group>";
+		};
+		83277DA21E72CEBF00752CCF /* Category */ = {
+			isa = PBXGroup;
+			children = (
+				83277DA31E72CEBF00752CCF /* LYPhotoPickerCategory.h */,
+				83277DA41E72CEBF00752CCF /* UIView+LYPhotoPicker.h */,
+				83277DA51E72CEBF00752CCF /* UIView+LYPhotoPicker.m */,
+				83277DA61E72CEBF00752CCF /* UIViewController+LYPhotoPicker.h */,
+				83277DA71E72CEBF00752CCF /* UIViewController+LYPhotoPicker.m */,
+			);
+			path = Category;
+			sourceTree = "<group>";
+		};
+		83277DA81E72CEBF00752CCF /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				83277DAD1E72CEBF00752CCF /* LYPhotoPickerController.h */,
+				83277DAE1E72CEBF00752CCF /* LYPhotoPickerController.m */,
+				83277DA91E72CEBF00752CCF /* LYPhotoBrowserViewController.h */,
+				83277DAA1E72CEBF00752CCF /* LYPhotoBrowserViewController.m */,
+				83277DAF1E72CEBF00752CCF /* LYPhotoSmallViewController.h */,
+				83277DB01E72CEBF00752CCF /* LYPhotoSmallViewController.m */,
+				83277DAB1E72CEBF00752CCF /* LYPhotoListViewController.h */,
+				83277DAC1E72CEBF00752CCF /* LYPhotoListViewController.m */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		83277DB11E72CEBF00752CCF /* LYGCD */ = {
+			isa = PBXGroup;
+			children = (
+				83277DB21E72CEBF00752CCF /* LYGCD.h */,
+				83277DB31E72CEBF00752CCF /* LYGCDQueue.h */,
+				83277DB41E72CEBF00752CCF /* LYGCDQueue.m */,
+				83277DB51E72CEBF00752CCF /* LYGCDSemaphore.h */,
+				83277DB61E72CEBF00752CCF /* LYGCDSemaphore.m */,
+			);
+			path = LYGCD;
+			sourceTree = "<group>";
+		};
+		83277DB71E72CEBF00752CCF /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				83277DB81E72CEBF00752CCF /* LYPhotoHelper.h */,
+				83277DB91E72CEBF00752CCF /* LYPhotoHelper.m */,
+				83277DBA1E72CEBF00752CCF /* LYPhotoMacro.h */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		83277DBB1E72CEBF00752CCF /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				83277DBC1E72CEBF00752CCF /* LYPhotoBrowserCell.h */,
+				83277DBD1E72CEBF00752CCF /* LYPhotoBrowserCell.m */,
+				83277DC21E72CEBF00752CCF /* LYPhotoSmallCell.h */,
+				83277DC31E72CEBF00752CCF /* LYPhotoSmallCell.m */,
+				83277DC01E72CEBF00752CCF /* LYPhotoListCell.h */,
+				83277DC11E72CEBF00752CCF /* LYPhotoListCell.m */,
+				83277DBE1E72CEBF00752CCF /* LYPhotoBrowserScrollView.h */,
+				83277DBF1E72CEBF00752CCF /* LYPhotoBrowserScrollView.m */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		83277DD11E72E2B800752CCF /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				83277DD21E72E2B800752CCF /* MBProgressHUD.h */,
+				83277DD31E72E2B800752CCF /* MBProgressHUD.m */,
+			);
+			path = Vendor;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		83277D511E72BA7E00752CCF /* LYPhotoPickerController */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 83277D691E72BA7E00752CCF /* Build configuration list for PBXNativeTarget "LYPhotoPickerController" */;
+			buildPhases = (
+				83277D4E1E72BA7E00752CCF /* Sources */,
+				83277D4F1E72BA7E00752CCF /* Frameworks */,
+				83277D501E72BA7E00752CCF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LYPhotoPickerController;
+			productName = LYPhotoPickerController;
+			productReference = 83277D521E72BA7E00752CCF /* LYPhotoPickerController.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		83277D4A1E72BA7E00752CCF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = LaiYoung_;
+				TargetAttributes = {
+					83277D511E72BA7E00752CCF = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = 7BT4LD3H35;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 83277D4D1E72BA7E00752CCF /* Build configuration list for PBXProject "LYPhotoPickerController" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 83277D491E72BA7E00752CCF;
+			productRefGroup = 83277D531E72BA7E00752CCF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				83277D511E72BA7E00752CCF /* LYPhotoPickerController */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		83277D501E72BA7E00752CCF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83277D651E72BA7E00752CCF /* LaunchScreen.storyboard in Resources */,
+				83277D621E72BA7E00752CCF /* Assets.xcassets in Resources */,
+				83277D601E72BA7E00752CCF /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		83277D4E1E72BA7E00752CCF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83277DCF1E72CEBF00752CCF /* LYPhotoListCell.m in Sources */,
+				83277D5D1E72BA7E00752CCF /* ViewController.m in Sources */,
+				83277DCD1E72CEBF00752CCF /* LYPhotoBrowserCell.m in Sources */,
+				83277DCA1E72CEBF00752CCF /* LYGCDQueue.m in Sources */,
+				83277D5A1E72BA7E00752CCF /* AppDelegate.m in Sources */,
+				83277DD01E72CEBF00752CCF /* LYPhotoSmallCell.m in Sources */,
+				83277DC91E72CEBF00752CCF /* LYPhotoSmallViewController.m in Sources */,
+				83277DD41E72E2B800752CCF /* MBProgressHUD.m in Sources */,
+				83277DCB1E72CEBF00752CCF /* LYGCDSemaphore.m in Sources */,
+				83277DCC1E72CEBF00752CCF /* LYPhotoHelper.m in Sources */,
+				83277DC71E72CEBF00752CCF /* LYPhotoListViewController.m in Sources */,
+				83277DC51E72CEBF00752CCF /* UIViewController+LYPhotoPicker.m in Sources */,
+				83277DC41E72CEBF00752CCF /* UIView+LYPhotoPicker.m in Sources */,
+				83277DC81E72CEBF00752CCF /* LYPhotoPickerController.m in Sources */,
+				83277D571E72BA7E00752CCF /* main.m in Sources */,
+				83277DCE1E72CEBF00752CCF /* LYPhotoBrowserScrollView.m in Sources */,
+				83277DC61E72CEBF00752CCF /* LYPhotoBrowserViewController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		83277D5E1E72BA7E00752CCF /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				83277D5F1E72BA7E00752CCF /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		83277D631E72BA7E00752CCF /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				83277D641E72BA7E00752CCF /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		83277D671E72BA7E00752CCF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		83277D681E72BA7E00752CCF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		83277D6A1E72BA7E00752CCF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 7BT4LD3H35;
+				INFOPLIST_FILE = LYPhotoPickerController/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.LaiYoung-.LYPhotoPickerController";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		83277D6B1E72BA7E00752CCF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 7BT4LD3H35;
+				INFOPLIST_FILE = LYPhotoPickerController/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.LaiYoung-.LYPhotoPickerController";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		83277D4D1E72BA7E00752CCF /* Build configuration list for PBXProject "LYPhotoPickerController" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83277D671E72BA7E00752CCF /* Debug */,
+				83277D681E72BA7E00752CCF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		83277D691E72BA7E00752CCF /* Build configuration list for PBXNativeTarget "LYPhotoPickerController" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83277D6A1E72BA7E00752CCF /* Debug */,
+				83277D6B1E72BA7E00752CCF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 83277D4A1E72BA7E00752CCF /* Project object */;
+}
