@@ -77,6 +77,10 @@ static CGFloat const photoCompressionQuality = 0.8;
     return self;
 }
 
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 #pragma mark - Public
 
 + (instancetype)shareInstance {
