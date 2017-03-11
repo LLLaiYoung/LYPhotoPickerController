@@ -208,14 +208,14 @@ static CGFloat const width = 40/2.0f;
 
 - (void)clickedMarkBtn:(LYPhotoMarkButton *)sender {
     LYPhotoAssetObject *assetObject = [self fetchCurrentIndexAssetObject];
-    PHAssetCollection *currentSelectedAssecCollection = [[UIViewController photoPickerController] valueForKey:KVC_CurrentSelectedAssecCollection];
+
     if (!sender.selected) {
-        BOOL success = [self.smallVC operationSelectedPhotoObjectsWithLYAssetObject:assetObject identifier:currentSelectedAssecCollection.localIdentifier remove:NO showTip:YES];
+        BOOL success = [self.smallVC operationSelectedPhotoObjectsWithLYAssetObject:assetObject identifier:assetObject.assetCollectionIdentifier remove:NO showTip:YES];
         if (!success) {
             return;
         }
     } else {
-        [self.smallVC operationSelectedPhotoObjectsWithLYAssetObject:assetObject identifier:currentSelectedAssecCollection.localIdentifier remove:YES showTip:YES];
+        [self.smallVC operationSelectedPhotoObjectsWithLYAssetObject:assetObject identifier:assetObject.assetCollectionIdentifier remove:YES showTip:YES];
     }
     [self resetSendBtnTitle];
     //* 这里是计算的所有选择的图片的字节大小 */

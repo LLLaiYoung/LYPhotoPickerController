@@ -39,6 +39,8 @@ NSCopying
 @property (nonatomic, copy) NSString *imageFileName;
 
 @property (nonatomic, copy, readonly) NSString *burstIdentifier;
+
+@property (nonatomic, copy) NSString *assetCollectionIdentifier;
 /** 选择的index */
 @property (nonatomic, assign) NSUInteger selectedIndex;
 /** 下一个节点 */

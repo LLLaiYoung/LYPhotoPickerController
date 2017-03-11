@@ -63,6 +63,8 @@ static CGFloat const photoCompressionQuality = 0.8;
 @property (nonatomic, strong) NSMutableArray *downloadList;
 
 @property (nonatomic, strong) NSArray *serialQueues;
+/** 中间桥接 */
+@property (nonatomic, copy) NSString *assetCollectionIdentifier;
 
 @end
 
@@ -220,6 +222,7 @@ static CGFloat const photoCompressionQuality = 0.8;
     if (isNull(assetCollection)) {
         return nil;
     }
+    self.assetCollectionIdentifier = assetCollection.localIdentifier;
     PHFetchResult *result = [self fetchResultAssetsInAssetCollection:assetCollection ascending:ascending];
     return [self fetchLYPhotoAssetObjectWithFetchResult:result];
 }
@@ -229,9 +232,12 @@ static CGFloat const photoCompressionQuality = 0.8;
         return nil;
     }
     NSMutableArray <LYPhotoAssetObject *>* lyAssets = [NSMutableArray array];
+    @weakify(self)
     [result enumerateObjectsUsingBlock:^(PHAsset * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         LYPhotoAssetObject *assetObject = [[LYPhotoAssetObject alloc] init];
         assetObject.imageFileName = [obj valueForKey:@"filename"];//使用KVC来获取filename，使用PHAssetResource获取严重影响用户体验，200张耗时3s
+        @strongify(self)
+        assetObject.assetCollectionIdentifier = self.assetCollectionIdentifier;
         assetObject.burstIdentifier = obj.burstIdentifier;
         if ([assetObject.imageFileName containsString:@".PNG"]
             || [assetObject.imageFileName containsString:@".JPG"]) {

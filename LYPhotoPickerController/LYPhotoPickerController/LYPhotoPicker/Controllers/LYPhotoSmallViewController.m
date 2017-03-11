@@ -572,9 +572,9 @@ static PHAssetCollection *currentSelectedAssecCollection;
         if (cell.selectBtn.selected) {
             lyAssetObject.selectedIndex = [self fetchAllSelectedLYPhotoAssetObjects].count + 1;
             lyAssetObject.nextIndex = lyAssetObject.selectedIndex + 1;
-            [self operationSelectedPhotoObjectsWithLYAssetObject:lyAssetObject identifier:currentSelectedAssecCollection.localIdentifier remove:NO showTip:YES];
+            [self operationSelectedPhotoObjectsWithLYAssetObject:lyAssetObject identifier:lyAssetObject.assetCollectionIdentifier remove:NO showTip:YES];
         } else {
-            [self operationSelectedPhotoObjectsWithLYAssetObject:lyAssetObject identifier:currentSelectedAssecCollection.localIdentifier remove:YES showTip:NO];
+            [self operationSelectedPhotoObjectsWithLYAssetObject:lyAssetObject identifier:lyAssetObject.assetCollectionIdentifier remove:YES showTip:NO];
         }
     }
 }
