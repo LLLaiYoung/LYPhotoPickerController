@@ -210,12 +210,12 @@ static CGFloat const width = 40/2.0f;
     LYPhotoAssetObject *assetObject = [self fetchCurrentIndexAssetObject];
 
     if (!sender.selected) {
-        BOOL success = [self.smallVC operationSelectedPhotoObjectsWithLYAssetObject:assetObject identifier:assetObject.assetCollectionIdentifier remove:NO showTip:YES];
+        BOOL success = [self.smallVC operationSelectedPhotoObjectsWithLYAssetObject:assetObject remove:NO showTip:YES];
         if (!success) {
             return;
         }
     } else {
-        [self.smallVC operationSelectedPhotoObjectsWithLYAssetObject:assetObject identifier:assetObject.assetCollectionIdentifier remove:YES showTip:YES];
+        [self.smallVC operationSelectedPhotoObjectsWithLYAssetObject:assetObject remove:YES showTip:YES];
     }
     [self resetSendBtnTitle];
     //* 这里是计算的所有选择的图片的字节大小 */
@@ -255,8 +255,7 @@ static CGFloat const width = 40/2.0f;
             sender.selected = !sender.selected;
             assetObject.albumTitle = _albumTitle;
             assetObject.selectedIndexPath = _currentIndexPath;
-            PHAssetCollection *currentSelectedAssecCollection = [[UIViewController photoPickerController] valueForKey:KVC_CurrentSelectedAssecCollection];
-            BOOL success_ = [self.smallVC operationSelectedPhotoObjectsWithLYAssetObject:assetObject identifier:currentSelectedAssecCollection.localIdentifier remove:NO showTip:NO];
+            BOOL success_ = [self.smallVC operationSelectedPhotoObjectsWithLYAssetObject:assetObject remove:NO showTip:NO];
             if (success_) {
                 self.markBtn.selected = YES;
                 [self resetSendBtnTitle];
@@ -275,8 +274,8 @@ static CGFloat const width = 40/2.0f;
 
 - (void)clickedSenderBtn:(UIButton *)sender {
     if (self.smallVC.selectedAlbumCount < 9 && !sender.selected) {//当选择的张数小于9张，并且当前这张没有选择才发送
-        PHAssetCollection *currentSelectedAssecCollection = [[UIViewController photoPickerController] valueForKey:KVC_CurrentSelectedAssecCollection];
-        [self.smallVC operationSelectedPhotoObjectsWithLYAssetObject:[self fetchCurrentIndexAssetObject] identifier:currentSelectedAssecCollection.localIdentifier remove:NO showTip:YES];
+        LYPhotoAssetObject *lyAssetObject = [self fetchCurrentIndexAssetObject];
+        [self.smallVC operationSelectedPhotoObjectsWithLYAssetObject:lyAssetObject remove:NO showTip:YES];
     }
     [self.smallVC clickedSenderWithOriginal:self.originalBtn.isSelected];
 }

@@ -24,7 +24,6 @@
 - (BOOL)isExistsLYPhotoAssetObject:(LYPhotoAssetObject *)object;
 /** 根据 LYPhotoAssetObject 对象，操作选择的 selectedPhotoObjects 数组*/
 - (BOOL)operationSelectedPhotoObjectsWithLYAssetObject:(LYPhotoAssetObject *)lyAssetObject
-                                            identifier:(NSString *)identifier
                                                 remove:(BOOL)remove
                                                showTip:(BOOL)show;
 /** 已经选择的照片的title及对应的选中张数 */

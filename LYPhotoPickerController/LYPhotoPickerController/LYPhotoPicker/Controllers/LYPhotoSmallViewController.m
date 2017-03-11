@@ -236,28 +236,29 @@ static PHAssetCollection *currentSelectedAssecCollection;
 }
 
 - (BOOL)operationSelectedPhotoObjectsWithLYAssetObject:(LYPhotoAssetObject *)lyAssetObject
-                                            identifier:(NSString *)identifier
                                                 remove:(BOOL)remove
                                                showTip:(BOOL)show
 {
-    if (isNull(lyAssetObject) || isNullStr(identifier)) {
+    if (isNull(lyAssetObject)) {
         return NO;
     }
     
-    NSMutableArray <LYPhotoAssetObject *> *objects = selectedItemDict[identifier];
+    if (remove) {
+        lyAssetObject = [self conversionLYPhotoAssetObject:lyAssetObject];
+    }
+    
+    NSMutableArray <LYPhotoAssetObject *> *objects = selectedItemDict[lyAssetObject.assetCollectionIdentifier];
     if (!objects) {
         objects = [NSMutableArray array];
     }
     
     if (remove) {
-        lyAssetObject = [self conversionLYPhotoAssetObject:lyAssetObject];
         [objects removeObject:lyAssetObject];
-        
     } else {
         /** 没包含需要添加的对象，并且没有达到最大张数 */
         if (![self selectedItemsContainLYPhotoAssetObject:lyAssetObject] && [self fetchAllSelectedLYPhotoAssetObjects].count < maxCount) {
             [objects addObject:lyAssetObject];
-            selectedItemDict[identifier] = objects;
+            selectedItemDict[lyAssetObject.assetCollectionIdentifier] = objects;
         } else {
             if (show) {
                 [self alert];
@@ -411,9 +412,7 @@ static PHAssetCollection *currentSelectedAssecCollection;
 - (BOOL)alert {
     if ([self fetchAllSelectedLYPhotoAssetObjects].count >= maxCount) {
         NSString *alertString = [NSString stringWithFormat:@"一次最多选择%li张照片",(unsigned long)maxCount];
-        [self showAlertControllerWithAlertMsg:alertString actionBlock:^{
-            [[UIViewController currentViewController] dismissViewControllerAnimated:YES completion:NULL];
-        }];
+        [self showAlertControllerWithAlertMsg:alertString actionBlock:NULL];
         return YES;
     }
     return NO;
@@ -572,9 +571,9 @@ static PHAssetCollection *currentSelectedAssecCollection;
         if (cell.selectBtn.selected) {
             lyAssetObject.selectedIndex = [self fetchAllSelectedLYPhotoAssetObjects].count + 1;
             lyAssetObject.nextIndex = lyAssetObject.selectedIndex + 1;
-            [self operationSelectedPhotoObjectsWithLYAssetObject:lyAssetObject identifier:lyAssetObject.assetCollectionIdentifier remove:NO showTip:YES];
+            [self operationSelectedPhotoObjectsWithLYAssetObject:lyAssetObject remove:NO showTip:YES];
         } else {
-            [self operationSelectedPhotoObjectsWithLYAssetObject:lyAssetObject identifier:lyAssetObject.assetCollectionIdentifier remove:YES showTip:NO];
+            [self operationSelectedPhotoObjectsWithLYAssetObject:lyAssetObject remove:YES showTip:NO];
         }
     }
 }
@@ -652,9 +651,10 @@ static PHAssetCollection *currentSelectedAssecCollection;
         }
         NSString *imageName = assetObjects[selectedIndex].imageFileName;
         if (![objects containsObject:imageName]) {//被删了
-            LYPhotoAssetObject *object = [[LYPhotoAssetObject alloc] init];
-            object.imageFileName = imageName;//构造LYPhotoAssetObject对象，在operationSelectedPhotoObjectsWithLYAssetObject，是根据imageFileName去找对应的对象
-            BOOL success = [self operationSelectedPhotoObjectsWithLYAssetObject:object identifier:key remove:YES showTip:NO];
+            LYPhotoAssetObject *lyAssetObject = [[LYPhotoAssetObject alloc] init];
+            lyAssetObject.imageFileName = imageName;//构造LYPhotoAssetObject对象，在operationSelectedPhotoObjectsWithLYAssetObject，是根据imageFileName去找对应的对象
+            lyAssetObject.assetCollectionIdentifier = key;
+            BOOL success = [self operationSelectedPhotoObjectsWithLYAssetObject:lyAssetObject remove:YES showTip:NO];
             if (success) {
                 [assetObjects removeObjectAtIndex:selectedIndex];
             }
