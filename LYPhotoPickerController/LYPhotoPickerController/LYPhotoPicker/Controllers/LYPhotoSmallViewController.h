@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-@class LYPhotoAssetObject,LYPhotoObject,PHAsset;
+@class LYPhotoAssetObject,LYPhotoObject,PHAsset,PHFetchResult;
 
 @interface LYPhotoSmallViewController : UIViewController
 /** 小图浏览的相册标题 */
@@ -31,5 +31,14 @@
 @property (nonatomic, copy) void(^selectedAlbumTitlesAndNumberBlock)(NSDictionary <NSString *, NSNumber *> *albumTitlesAndNumberDict);
 /** 关闭控制器并发送数据，是否原图 */
 - (void)clickedSenderWithOriginal:(BOOL)original;
+
+/** 显示提示框 */
+- (void)showAlertControllerWithAlertMsg:(NSString *)alertMsg actionBlock:(dispatch_block_t)actionBlock;
+
+/** 处理通过设备的“照片”形式删除的对象 */
+- (void)handleDeleteDevicePhotoObjectWithAfterResult:(PHFetchResult *)afterResult key:(NSString *)key;
+
+/** 处理PhotoList发生改变， deleteHandle 列表被删除的操作，删除数据，刷新UI */
+- (void)handlePhotoListChangeWithNotification:(NSNotification *)noti deleteHandle:(dispatch_block_t)deleteHandle;
 
 @end

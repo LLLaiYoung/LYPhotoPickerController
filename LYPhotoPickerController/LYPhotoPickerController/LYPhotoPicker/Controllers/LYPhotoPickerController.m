@@ -24,9 +24,6 @@ NSString *const KVC_CurrentSelectedAssecCollection  = @"currentSelectedAssecColl
 NSString *const KVC_SelectCollectionResultDict      = @"selectCollectionResultDict";
 NSString *const KVC_ItemWidth_Number                = @"itemWidth";
 
-///** 记录list的个数,用于photolist界面的刷新 */
-//static NSArray <NSString *> *photoListIdentifier;
-
 @interface LYPhotoPickerController ()
 <
 PHPhotoLibraryChangeObserver
@@ -37,7 +34,7 @@ PHPhotoLibraryChangeObserver
 /** 外界不用关心这个属性，相册改变，当前选择的 PHAssetCollection，用于获取当前PHAssetCollection内容 */
 @property (nonatomic, strong) PHAssetCollection *currentSelectedAssecCollection;
 
-/** 相册改变，存所有list的identifier，当 list 个数发生改变 找到被删的，如果是新增的话就发nil，在收到通知的时候，如果收到的对象这个不为nil的话，就遍历处理，为nil的话就不刷新 */
+/** 相册改变，存所有list的identifier，当 list 个数发生改变 找到被删的，如果是新增的话就发空对象（不包含元素的对象），在收到通知的时候，如果收到的对象不为空的话，就遍历处理，为nil的话就不刷新 */
 @property (nonatomic, strong) NSArray <NSString *> *photoListIdentifiers;
 
 @property (nonatomic, strong) NSNumber *itemWidth;
@@ -200,13 +197,20 @@ PHPhotoLibraryChangeObserver
 #pragma mark - Change Handling
 
 - (void)photoLibraryDidChange:(PHChange *)changeInstance {
+    BOOL postPhotoListChangeNotification = YES;
     for (NSString *key in self.selectCollectionResultDict.allKeys) {
         PHFetchResult *result = self.selectCollectionResultDict[key];
         PHFetchResultChangeDetails *collectionChanges = [changeInstance changeDetailsForFetchResult:result];
         if (!isNull(collectionChanges)) {
             [self postAssetCollectionChangeNotificationWithAfterFetchResult:[collectionChanges fetchResultAfterChanges] key:key];
+            //如果为0，就不发 kPhotoListChangeNotification
+            if ([collectionChanges fetchResultAfterChanges].count == 0) {
+                postPhotoListChangeNotification = NO;
+            }
         }
     }
+    
+    if (!postPhotoListChangeNotification) return;
     
     NSArray *listIdentifier = [[LYPhotoHelper shareInstance] fetchAllListObjectIdentifier];
     

@@ -25,12 +25,15 @@ static NSMutableArray <LYPhotoObject *> *selectedNonOriginalPhotoPbjects;
 /** key:PHAssetCollection.localIdentifier value:PHFetchResult，只增不删 */
 static NSMutableDictionary <NSString *, PHFetchResult *> *selectedCollectionResultDict;
 
+/** 相册改变 */
+static PHAssetCollection *currentSelectedAssecCollection;
+
 @interface LYPhotoSmallViewController ()
 @property (nonatomic, strong) UICollectionView *smallCollectionView;
 @property (nonatomic, strong) UIView *bottomContainerView;
 @property (nonatomic, strong) UIButton *previewBtn;
 @property (nonatomic, strong) UIButton *senderBtn;
-@property (nonatomic, strong) PHAssetCollection *collection;
+
 @end
 
 @implementation LYPhotoSmallViewController
@@ -68,7 +71,9 @@ static NSMutableDictionary <NSString *, PHFetchResult *> *selectedCollectionResu
 #pragma mark - LayoutSubviews
 - (void)initSubviews {
     if (![[LYPhotoHelper shareInstance] albumAuthority]) {
-        [self showAlertControllerWithAlertMsg:@"请在iPhone的\"设置-隐私-相册\"中允许访问相册" pop:NO];
+        [self showAlertControllerWithAlertMsg:@"请在iPhone的\"设置-隐私-相册\"中允许访问相册" actionBlock:^{
+            [[UIViewController currentViewController] dismissViewControllerAnimated:YES completion:NULL];
+        }];
     } else {
         self.title = _smallTitle;
         UIBarButtonItem *cancelBtnItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStylePlain target:self action:@selector(clickedCancelBtnItem:)];
@@ -219,21 +224,6 @@ static NSMutableDictionary <NSString *, PHFetchResult *> *selectedCollectionResu
     [self clickedSenderWithOriginal:NO];
 }
 
-- (void)showAlertControllerWithAlertMsg:(NSString *)alertMsg pop:(BOOL)pop {
-    if (!isNullStr(alertMsg)) {
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:alertMsg preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            if (pop) {
-                [self.navigationController popToRootViewControllerAnimated:YES];
-            } else {
-                [self dismissViewControllerAnimated:YES completion:NULL];
-            }
-        }];
-        [alertController addAction:cancelAction];
-        [self presentViewController:alertController animated:YES completion:NULL];
-    }
-}
-
 # pragma mark - Public
 
 - (BOOL)isExistsLYPhotoAssetObject:(LYPhotoAssetObject *)object {
@@ -291,6 +281,53 @@ static NSMutableDictionary <NSString *, PHFetchResult *> *selectedCollectionResu
     maxCount = 0;
 }
 
+- (void)showAlertControllerWithAlertMsg:(NSString *)alertMsg actionBlock:(dispatch_block_t)actionBlock {
+    if (!isNullStr(alertMsg)) {
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:alertMsg preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            if (actionBlock) {
+                actionBlock();
+            }
+        }];
+        [alertController addAction:cancelAction];
+        [[UIViewController currentViewController] presentViewController:alertController animated:YES completion:NULL];
+    }
+}
+
+- (void)handlePhotoListChangeWithNotification:(NSNotification *)noti deleteHandle:(dispatch_block_t)deleteHandle {
+    NSMutableSet *deleteOrAddIdentifierSet = noti.userInfo[kDeleteIdentifier];
+    if (deleteOrAddIdentifierSet.count == 0) {//新增不管
+        return;
+    }
+    NSArray <NSString *> *listIdentifiers = [[LYPhotoHelper shareInstance] fetchAllListObjectIdentifier];
+    
+    NSString *currentIdentifier = currentSelectedAssecCollection.localIdentifier;
+    if (![listIdentifiers containsObject:currentIdentifier]) {//当前列表被删了
+        if (deleteHandle) {
+            deleteHandle();
+        }
+        [self showAlertControllerWithAlertMsg:@"该相册已被删除" actionBlock:^{
+            [[UIViewController currentNavigationViewController] popToRootViewControllerAnimated:YES];
+        }];
+        NSMutableSet *allAssetImageNames = [NSMutableSet set];
+        for (NSUInteger index = 0; index < maxCount; index++) {
+            NSString *string = [NSString stringWithFormat:@"null+nil+error+%lu",index];
+            [allAssetImageNames addObject:string];
+        }
+        [self handleDeleteDevicePhotoObjects:allAssetImageNames key:currentIdentifier];
+        [deleteOrAddIdentifierSet removeObject:currentIdentifier];
+    }
+    //其他列表，其中可能含有已经选中的，不使用else 是因为deleteOrAddIdentifierSet可能是很多个，如果在当前列表中，走了if，那么在其他被删的列表中，选中的就不会处理
+    for (NSString *deleteIdentifier in deleteOrAddIdentifierSet) {
+        NSMutableSet *allAssetImageNames = [NSMutableSet set];
+        for (NSUInteger index = 0; index < maxCount; index++) {
+            NSString *string = [NSString stringWithFormat:@"null+nil+error+%lu",index];
+            [allAssetImageNames addObject:string];
+        }
+        [self handleDeleteDevicePhotoObjects:allAssetImageNames key:deleteIdentifier];
+    }
+}
+
 # pragma mark - Private
 
 - (void)loadData {
@@ -303,6 +340,7 @@ static NSMutableDictionary <NSString *, PHFetchResult *> *selectedCollectionResu
     if (maxCount==0) {
         maxCount = [UIViewController photoPickerController].maxCount;
     }
+    currentSelectedAssecCollection = [[UIViewController photoPickerController] valueForKey:KVC_CurrentSelectedAssecCollection];
 }
 
 - (void)registerNotification {
@@ -373,10 +411,9 @@ static NSMutableDictionary <NSString *, PHFetchResult *> *selectedCollectionResu
 - (BOOL)alert {
     if ([self fetchAllSelectedLYPhotoAssetObjects].count >= maxCount) {
         NSString *alertString = [NSString stringWithFormat:@"一次最多选择%li张照片",(unsigned long)maxCount];
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:alertString preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleCancel handler:NULL];
-        [alertController addAction:cancelAction];
-        [[UIViewController currentViewController] presentViewController:alertController animated:YES completion:NULL];
+        [self showAlertControllerWithAlertMsg:alertString actionBlock:^{
+            [[UIViewController currentViewController] dismissViewControllerAnimated:YES completion:NULL];
+        }];
         return YES;
     }
     return NO;
@@ -384,10 +421,6 @@ static NSMutableDictionary <NSString *, PHFetchResult *> *selectedCollectionResu
 
 - (void)resetSendBtnTitle {
     //获取当前选择的 PHAssetCollection
-    PHAssetCollection *currentSelectedAssecCollection = [[UIViewController photoPickerController] valueForKey:KVC_CurrentSelectedAssecCollection];
-    if (isNull(currentSelectedAssecCollection)) {
-        currentSelectedAssecCollection = self.collection;
-    }
     if (isNull(currentSelectedAssecCollection)) {
         return;
     }
@@ -536,7 +569,6 @@ static NSMutableDictionary <NSString *, PHFetchResult *> *selectedCollectionResu
         LYPhotoAssetObject *lyAssetObject = self.fetchLYSmallAsset[indexPath.row];
         lyAssetObject.albumTitle = _smallTitle;
         lyAssetObject.selectedIndexPath = indexPath;
-        PHAssetCollection *currentSelectedAssecCollection = [[UIViewController photoPickerController] valueForKey:KVC_CurrentSelectedAssecCollection];
         if (cell.selectBtn.selected) {
             lyAssetObject.selectedIndex = [self fetchAllSelectedLYPhotoAssetObjects].count + 1;
             lyAssetObject.nextIndex = lyAssetObject.selectedIndex + 1;
@@ -552,12 +584,13 @@ static NSMutableDictionary <NSString *, PHFetchResult *> *selectedCollectionResu
 - (void)assetCollectionChangeNotification:(NSNotification *)noti {
     PHFetchResult *afterResult = noti.userInfo[kAfter];
     NSString *key = noti.userInfo[kKey];
-    PHAssetCollection *currentSelectedAssecCollection = [[UIViewController photoPickerController] valueForKey:KVC_CurrentSelectedAssecCollection];
     self.fetchLYSmallAsset = [[LYPhotoHelper shareInstance] fetchLYPhotoAssetObjectInAssetCollection:currentSelectedAssecCollection ascending:YES];
     //要先reload
     [self.smallCollectionView reloadData];
     if (self.fetchLYSmallAsset.count == 0) {
-        [self showAlertControllerWithAlertMsg:@"该相册无照片" pop:YES];
+        [self showAlertControllerWithAlertMsg:@"该相册无照片" actionBlock:^{
+            [[UIViewController currentNavigationViewController] popViewControllerAnimated:YES];
+        }];
     } else {
         if ([currentSelectedAssecCollection.localIdentifier isEqualToString:key]) {//是当前才滚动到最后
             [self.smallCollectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:self.fetchLYSmallAsset.count-1 inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
@@ -567,35 +600,13 @@ static NSMutableDictionary <NSString *, PHFetchResult *> *selectedCollectionResu
     [self handleDeleteDevicePhotoObjectWithAfterResult:afterResult key:key];
 }
 - (void)photoListChangeNotification:(NSNotification *)noti {
-    NSMutableSet *deleteIdentifierSet = noti.userInfo[kDeleteIdentifier];
-    if (deleteIdentifierSet.count == 0) {//新增不管
-        return;
-    }
-    NSArray <NSString *> *listIdentifiers = [[LYPhotoHelper shareInstance] fetchAllListObjectIdentifier];
-    self.collection = [[UIViewController photoPickerController] valueForKey:KVC_CurrentSelectedAssecCollection];
-    NSString *currentIdentifier = self.collection.localIdentifier;
-    
-    if (![listIdentifiers containsObject:currentIdentifier]) {//当前列表被删了
+    if (![[UIViewController currentViewController] isKindOfClass:[self class]]) return;
+    @weakify(self)
+    [self handlePhotoListChangeWithNotification:noti deleteHandle:^{
+        @strongify(self)
         self.fetchLYSmallAsset = nil;
         [self.smallCollectionView reloadData];
-        [self showAlertControllerWithAlertMsg:@"该相册已被删除" pop:YES];
-        NSMutableSet *allAssetImageNames = [NSMutableSet set];
-        for (NSUInteger index = 0; index < maxCount; index++) {
-            NSString *string = [NSString stringWithFormat:@"null+nil+error+%lu",index];
-            [allAssetImageNames addObject:string];
-        }
-        [self handleDeleteDevicePhotoObjects:allAssetImageNames key:currentIdentifier];
-        [deleteIdentifierSet removeObject:currentIdentifier];
-    }
-    //其他列表，其中可能含有已经选中的，不使用else 是因为deleteIdentifierSet可能是很多个，如果在当前列表中，走了if，那么在其他被删的列表中，选中的就不会处理
-    for (NSString *deleteIdentifier in deleteIdentifierSet) {
-        NSMutableSet *allAssetImageNames = [NSMutableSet set];
-        for (NSUInteger index = 0; index < maxCount; index++) {
-            NSString *string = [NSString stringWithFormat:@"null+nil+error+%lu",index];
-            [allAssetImageNames addObject:string];
-        }
-        [self handleDeleteDevicePhotoObjects:allAssetImageNames key:deleteIdentifier];
-    }
+    }];
 }
 
 #pragma mark - 处理通过设备的“照片”形式删除的对象

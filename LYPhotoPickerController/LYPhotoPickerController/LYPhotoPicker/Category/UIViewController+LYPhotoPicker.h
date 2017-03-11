@@ -13,6 +13,8 @@
 
 + (UIViewController *)currentViewController;
 
++ (UINavigationController*)currentNavigationViewController;
+
 + (LYPhotoPickerController *)photoPickerController;
 
 @end

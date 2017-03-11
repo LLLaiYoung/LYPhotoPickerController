@@ -20,6 +20,11 @@
     return [self currentViewControllerFrom:rootViewController];
 }
 
++ (UINavigationController*)currentNavigationViewController {
+    UIViewController* currentViewController = self.currentViewController;
+    return currentViewController.navigationController;
+}
+
 // 通过递归拿到当前控制器
 + (UIViewController*)currentViewControllerFrom:(UIViewController*)viewController {
     if ([viewController isKindOfClass:[UINavigationController class]]) {

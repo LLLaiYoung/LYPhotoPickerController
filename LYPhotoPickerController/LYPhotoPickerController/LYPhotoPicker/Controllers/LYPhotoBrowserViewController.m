@@ -96,6 +96,10 @@ static CGFloat const width = 40/2.0f;
     [self checkMarkSelectedWithIndex:self.index];
 }
 
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
@@ -228,8 +232,8 @@ static CGFloat const width = 40/2.0f;
     }
     
     if (self.isPreviewModel) {
-        [self setNavigationTitle];
         [self removeObjectWithLYPhotoAssetObject:assetObject];
+        [self setNavigationTitle];
         if (self.smallVC.selectedAlbumCount == 0) {
             [self.navigationController popViewControllerAnimated:YES];
         }
@@ -283,6 +287,8 @@ static CGFloat const width = 40/2.0f;
 
 - (void)registerNotification {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dismissNotification) name:@"dismissNotification" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(assetCollectionChangeNotification:) name:kAssetCollectionChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(photoListChangeNotification:) name:kPhotoListChangeNotification object:nil];
 }
 
 - (void)reloadData {
@@ -323,11 +329,6 @@ static CGFloat const width = 40/2.0f;
 - (void)checkMarkSelectedWithIndex:(NSUInteger)index {
     LYPhotoAssetObject *currentAssetObject = _dataSource[index];
     self.markBtn.selected = [self.smallVC isExistsLYPhotoAssetObject:currentAssetObject];
-    //    if (self.bottomContainerView.originalBtn.selected) {
-    //        if (!isNull(currentAssetObject)) {
-    //            [self resetOriginalBtnTitleWithAssetObject:currentAssetObject];
-    //        }
-    //    }
 }
 
 /** 删除dataSource中对应的LYPhotoAssetObject */
@@ -414,6 +415,54 @@ static CGFloat const width = 40/2.0f;
         }];
     }
 }
+
+- (void)assetCollectionChangeNotification:(NSNotification *)noti {
+    if (![[UIViewController currentViewController] isKindOfClass:[self class]]) return;
+    PHFetchResult *afterResult = noti.userInfo[kAfter];
+    NSString *key = noti.userInfo[kKey];
+    PHAssetCollection *currentSelectedAssecCollection = [[UIViewController photoPickerController] valueForKey:KVC_CurrentSelectedAssecCollection];
+    
+    NSArray *assets = [[LYPhotoHelper shareInstance] fetchLYPhotoAssetObjectWithFetchResult:afterResult];
+
+    if (assets.count == 0) {//可能这个相册只有一张图，又被删了。
+        [self.smallVC showAlertControllerWithAlertMsg:@"该图已经被删除" actionBlock:^{
+            [[UIViewController currentNavigationViewController] popToRootViewControllerAnimated:YES];;
+        }];
+    } else {
+        NSMutableArray *imageNames = [[LYPhotoHelper shareInstance] fetchAllCollectionFilenameWithCollection:currentSelectedAssecCollection].mutableCopy;
+        
+        self.dataSource = [NSMutableArray arrayWithArray:assets];
+        
+        if (![imageNames containsObject:self.imageName]) {//不包含当前这个（被删了）
+            _index = assets.count - 1;//最后一个
+        } else {
+            for (NSUInteger index = 0; index < imageNames.count; index++ ) {
+                NSString *imageName = imageNames[index];
+                if ([imageName isEqualToString:self.imageName]) {
+                    _index = index;
+                    break;
+                }
+            }
+        }
+        _currentPage = 0;//在reloadData的时候会重新赋值
+        [self reloadData];
+        [self.browserCollectionView reloadData];//需要reload，不然左右滑动的时候会crash
+    }
+    [self.smallVC handleDeleteDevicePhotoObjectWithAfterResult:afterResult key:key];
+    [self resetSendBtnTitle];
+    [self checkMarkSelectedWithIndex:_currentPage];
+}
+
+- (void)photoListChangeNotification:(NSNotification *)noti {
+    if (![[UIViewController currentViewController] isKindOfClass:[self class]]) return;
+    @weakify(self)
+    [self.smallVC handlePhotoListChangeWithNotification:noti deleteHandle:^{
+        @strongify(self)
+        [self.dataSource removeAllObjects];
+        [self.browserCollectionView reloadData];
+    }];
+}
+
 
 # pragma mark - Protocol conformance
 

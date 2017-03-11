@@ -155,6 +155,7 @@
 #pragma mark - Notification
 
 - (void)photoListChangeNotification:(NSNotification *)noti {
+    if (![[UIViewController currentViewController] isKindOfClass:[self class]]) return;
     self.photoList = [[LYPhotoHelper shareInstance] fetchAllPhotoList];
     if (self.photoList.count == 0) {
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"无相册列表可选择" preferredStyle:UIAlertControllerStyleAlert];

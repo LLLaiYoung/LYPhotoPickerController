@@ -27,7 +27,7 @@
     LYPhotoPickerController *photoPicker = [[LYPhotoPickerController alloc] init];
     photoPicker.maxCount = 9;
     photoPicker.senderBlock = senderBlock;
-    photoPicker.saveSelected = NO;
+//    photoPicker.saveSelected = NO;
     photoPicker.lineCount = 3;
     photoPicker.spacing = 3.0f;
     [self presentViewController:photoPicker animated:YES completion:nil];
