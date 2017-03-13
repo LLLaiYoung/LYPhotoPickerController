@@ -68,7 +68,7 @@ static CGFloat const kRedDotWidth = 10.0f;
         CGFloat y = (self.contentView.height - kRedDotWidth)/2.0f;
         UIBezierPath *bezierPath = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(x, y, kRedDotWidth, kRedDotWidth) cornerRadius:kRedDotWidth/2.0f];
         _redDotLayer.path = bezierPath.CGPath;
-        _redDotLayer.fillColor = [UIColor whiteColor].CGColor;
+        _redDotLayer.fillColor = [UIColor clearColor].CGColor;
     }
     return _redDotLayer;
 }
@@ -105,7 +105,7 @@ static CGFloat const kRedDotWidth = 10.0f;
     if (showRedDot) {
         self.redDotLayer.fillColor = [UIColor redColor].CGColor;
     } else {
-        self.redDotLayer.fillColor = [UIColor whiteColor].CGColor;
+        self.redDotLayer.fillColor = [UIColor clearColor].CGColor;
     }
 }
 
