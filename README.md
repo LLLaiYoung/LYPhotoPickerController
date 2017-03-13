@@ -14,6 +14,7 @@
 	1. list 的 Add／Delete
 	2. 对已选的照片从设备“照片”删除
 	3. 在 A Collection 中选择了 A1，同时 A1 还存在于 B Collection 中，在 B Collection 中 删除 A1
+	4. 在 browser 界面的时候，当前所对应的list被删除（还有被选中的PHAsset对象）
 	4. 很多实现了的功能，待列出来
 
 ###TODO：

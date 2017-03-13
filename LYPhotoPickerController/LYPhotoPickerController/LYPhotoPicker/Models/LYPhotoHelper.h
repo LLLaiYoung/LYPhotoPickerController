@@ -83,10 +83,7 @@ typedef NS_OPTIONS(NSUInteger, LYPhotoCollectionType) {
 
 + (instancetype)shareInstance;
 
-/** 获取所有相册列表,默认 UserAlbum SmartAlbum */
-- (NSArray <LYPhotoListObject *> *)fetchAllPhotoList;
-
-/** 获取所有相册列表 */
+/** 获取所有相册列表 (缓存)*/
 - (NSArray <LYPhotoListObject *> *)fetchAllPhotoListWithCollectionType:(LYPhotoCollectionType)collectionType;
 
 /**
@@ -128,13 +125,13 @@ typedef NS_OPTIONS(NSUInteger, LYPhotoCollectionType) {
 - (NSArray <NSString *> *)fetchAllCollectionFilenameWithCollection:(PHAssetCollection *)assetCollection;
 
 /** 获取所有的list的唯一标识符 */
-- (NSArray <NSString *> *)fetchAllListObjectIdentifier;
+- (NSArray <NSString *> *)fetchAllListObjectIdentifierWithCollectionType:(LYPhotoCollectionType)collectionType;
 
 /** 根据 AssetCollection 获取 Assets */
 - (PHFetchResult *)fetchResultAssetsInAssetCollection:(PHAssetCollection *)assetCollection ascending:(BOOL)ascending;
 
 /** 获取所有相册列表里面的所有图片名称，用于相册内容发生改变（删除） */
-- (NSSet *)fetchAllImageNamesInPhotoList;
+- (NSSet *)fetchAllImageNamesInPhotoListWithCollectionType:(LYPhotoCollectionType)collectionType;
 
 /** 将 LYPhotoAssetObject 转换成 LYPhotoObjects , 支持原图才有 0 原图，1 非原图，不支持原图就只有非原图 */
 - (NSArray <LYPhotoObject *> *)transformLYAssetPhoto:(LYPhotoAssetObject *)lyAssetObject;

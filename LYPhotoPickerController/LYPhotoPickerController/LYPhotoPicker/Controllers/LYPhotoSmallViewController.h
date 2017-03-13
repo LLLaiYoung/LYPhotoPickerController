@@ -18,9 +18,9 @@
 @property (nonatomic, assign, readonly) NSUInteger selectedAlbumCount;
 /** 已经选择的assets */
 @property (nonatomic, strong, readonly) NSArray <PHAsset *> *selectedAssets;
-/** 删除 selectedItems和selectedPhotoObjects 里所有的数据并将 maxCount 置为0 */
+
 - (void)removeAllObjects;
-/** LYPhotoAssetObject 是否存在于 selectedItems 数组中 */
+/** LYPhotoAssetObject 是否存在于 selectedItemDict 数组中 */
 - (BOOL)isExistsLYPhotoAssetObject:(LYPhotoAssetObject *)object;
 /** 根据 LYPhotoAssetObject 对象，操作选择的 selectedPhotoObjects 数组*/
 - (BOOL)operationSelectedPhotoObjectsWithLYAssetObject:(LYPhotoAssetObject *)lyAssetObject
@@ -28,6 +28,8 @@
                                                showTip:(BOOL)show;
 /** 已经选择的照片的title及对应的选中张数 */
 @property (nonatomic, copy) void(^selectedAlbumTitlesAndNumberBlock)(NSDictionary <NSString *, NSNumber *> *albumTitlesAndNumberDict);
+/** 获取已选对象所存在于那几个list中 */
+@property (nonatomic, copy) void(^containsPhotoListNamesBlock)(NSSet <NSString *> *containsPhotoListNames);
 /** 关闭控制器并发送数据，是否原图 */
 - (void)clickedSenderWithOriginal:(BOOL)original;
 

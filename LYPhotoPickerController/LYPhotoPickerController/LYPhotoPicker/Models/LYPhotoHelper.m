@@ -66,6 +66,8 @@ static CGFloat const photoCompressionQuality = 0.8;
 /** 中间桥接 */
 @property (nonatomic, copy) NSString *assetCollectionIdentifier;
 
+@property (nonatomic, strong) NSArray *lyPhotoListCache;
+
 @end
 
 @implementation LYPhotoHelper
@@ -94,11 +96,16 @@ static CGFloat const photoCompressionQuality = 0.8;
     return helper;
 }
 
-- (NSArray <LYPhotoListObject *> *)fetchAllPhotoList {
-    return [self fetchAllPhotoListWithCollectionType:LYPhotoCollectionTypeAlbum|LYPhotoCollectionTypeSmartAlbum];
+- (NSArray <LYPhotoListObject *> *)fetchAllPhotoListWithCollectionType:(LYPhotoCollectionType)collectionType {
+    if (self.lyPhotoListCache.count != 0) {
+        return self.lyPhotoListCache;
+    } else {
+        return [self fetchAllPhotoListNonGotoCacheWithCollectionType:collectionType];
+    }
 }
 
-- (NSArray <LYPhotoListObject *> *)fetchAllPhotoListWithCollectionType:(LYPhotoCollectionType)collectionType {
+/** 不走缓存 */
+- (NSArray <LYPhotoListObject *> *)fetchAllPhotoListNonGotoCacheWithCollectionType:(LYPhotoCollectionType)collectionType {
     __block NSMutableArray<LYPhotoListObject *> *photoList = @[].mutableCopy;
     LYGCDSemaphore *semphore = [[LYGCDSemaphore alloc] init];
     [LYGCDQueue executeInHighPriorityGlobalQueue:^{
@@ -123,9 +130,9 @@ static CGFloat const photoCompressionQuality = 0.8;
         [semphore signal];
     }];
     [semphore wait];
+    _lyPhotoListCache = photoList;
     return photoList;
 }
-
 
 /** 根据 AssetCollection 获取 Assets */
 - (PHFetchResult *)fetchResultAssetsInAssetCollection:(PHAssetCollection *)assetCollection ascending:(BOOL)ascending {
@@ -260,8 +267,8 @@ static CGFloat const photoCompressionQuality = 0.8;
     return fileNames.copy;
 }
 
-- (NSArray <NSString *> *)fetchAllListObjectIdentifier {
-    NSArray <LYPhotoListObject *> *list = [[LYPhotoHelper shareInstance] fetchAllPhotoList];
+- (NSArray <NSString *> *)fetchAllListObjectIdentifierWithCollectionType:(LYPhotoCollectionType)collectionType {
+   NSArray <LYPhotoListObject *> *list = [[LYPhotoHelper shareInstance] fetchAllPhotoListNonGotoCacheWithCollectionType:collectionType];
     NSMutableArray <NSString *> *listIdentifiers = [NSMutableArray array];
     for (LYPhotoListObject *listObject in list) {
         [listIdentifiers addObject:listObject.listIdentifier];
@@ -269,10 +276,10 @@ static CGFloat const photoCompressionQuality = 0.8;
     return listIdentifiers.copy;
 }
 
-- (NSSet *)fetchAllImageNamesInPhotoList {
+- (NSSet *)fetchAllImageNamesInPhotoListWithCollectionType:(LYPhotoCollectionType)collectionType {
     NSMutableSet *allImageNames = [NSMutableSet set];
     NSMutableArray *allAssets = [NSMutableArray array];
-    NSArray <LYPhotoListObject *> *photoList = [[LYPhotoHelper shareInstance] fetchAllPhotoList];
+    NSArray <LYPhotoListObject *> *photoList = [[LYPhotoHelper shareInstance] fetchAllPhotoListWithCollectionType:collectionType];
     for (LYPhotoListObject *listObject in photoList) {
         NSArray *assets_ = [[LYPhotoHelper shareInstance] fetchLYPhotoAssetObjectInAssetCollection:listObject.assetCollection ascending:YES];
         [allAssets addObject:assets_];

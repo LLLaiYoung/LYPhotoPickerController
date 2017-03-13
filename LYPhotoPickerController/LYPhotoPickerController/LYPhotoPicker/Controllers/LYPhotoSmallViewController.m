@@ -54,8 +54,18 @@ static PHAssetCollection *currentSelectedAssecCollection;
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    if (self.selectedAlbumTitlesAndNumberBlock) {
-        self.selectedAlbumTitlesAndNumberBlock([self selectedAlbumTitlesAndNumberDict]);
+    if (![UIViewController photoPickerController].saveSelected) {//不保存
+        [self removeAllObjects];
+    } else {
+        if ([UIViewController photoPickerController].markType == LYPhotoListSelectMarkTypeNumber) {
+            if (self.selectedAlbumTitlesAndNumberBlock) {
+                self.selectedAlbumTitlesAndNumberBlock([self selectedAlbumTitlesAndNumberDict]);
+            }
+        } else if ([UIViewController photoPickerController].markType == LYPhotoListSelectMarkTypeRedDot) {
+            if (self.containsPhotoListNamesBlock) {
+                self.containsPhotoListNamesBlock([self containsPhotoListNames]);
+            }
+        }
     }
 }
 
@@ -300,8 +310,8 @@ static PHAssetCollection *currentSelectedAssecCollection;
     if (deleteOrAddIdentifierSet.count == 0) {//新增不管
         return;
     }
-    NSArray <NSString *> *listIdentifiers = [[LYPhotoHelper shareInstance] fetchAllListObjectIdentifier];
     
+    NSArray <NSString *> *listIdentifiers = [[UIViewController photoPickerController] valueForKey:KVC_PhotoListIdentifiers];
     NSString *currentIdentifier = currentSelectedAssecCollection.localIdentifier;
     if (![listIdentifiers containsObject:currentIdentifier]) {//当前列表被删了
         if (deleteHandle) {
@@ -399,14 +409,31 @@ static PHAssetCollection *currentSelectedAssecCollection;
     return titlesAndNumberDict.copy;
 }
 
-//- (void)ss {
-//    NSArray *titles = [self selectedAlbumTitlesAndNumberDict].allKeys;
-//    NSArray *lists = [[LYPhotoHelper shareInstance] fetchAllPhotoList];
-//    for (LYPhotoListObject *listObject in lists) {
-//       NSArray *collectionFilenames = [[LYPhotoHelper shareInstance] fetchAllCollectionFilenameWithCollection:listObject.assetCollection];
-//
-//    }
-//}
+/** 获取已选对象所存在于那几个list中 */
+- (NSSet <NSString *> *)containsPhotoListNames {
+    if (selectedItemDict.count == 0) {
+        return nil;
+    }
+    NSMutableArray *operationTitles = [NSMutableArray array];
+    for (NSArray *assetObjects in selectedItemDict.allValues) {
+        for (LYPhotoAssetObject *assetObject in assetObjects) {
+            [operationTitles addObject:assetObject.imageFileName];
+        }
+    }
+    
+    NSMutableSet *mutableNames = [NSMutableSet set];
+    NSArray <LYPhotoListObject *> *lists = [[LYPhotoHelper shareInstance] fetchAllPhotoListWithCollectionType:[UIViewController photoPickerController].collectionType];
+#warning 还需要优化
+    for (NSString *titleName in operationTitles) {
+        for (LYPhotoListObject *listObject in lists) {
+            NSArray *collectionFilenames = [[LYPhotoHelper shareInstance] fetchAllCollectionFilenameWithCollection:listObject.assetCollection];
+            if ([collectionFilenames containsObject:titleName]) {
+                [mutableNames addObject:listObject.photoTitle];
+            }
+        }
+    }
+    return mutableNames.copy;
+}
 
 /** 如果超过 maxCount 就弹出提示框（在 !selected 的时候判断 ），返回 YES return */
 - (BOOL)alert {

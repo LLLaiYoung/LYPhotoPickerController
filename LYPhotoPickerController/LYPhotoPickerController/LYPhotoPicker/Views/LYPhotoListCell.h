@@ -12,4 +12,7 @@
 @property (nonatomic, strong) LYPhotoListObject *listObject;
 /** 0不显示 */
 @property (nonatomic, assign) NSInteger count;
+
+@property (nonatomic, assign) BOOL showRedDot;
+
 @end

@@ -23,6 +23,7 @@ NSString *const kDeleteIdentifier                       = @"kDeleteIdentifier";
 NSString *const KVC_CurrentSelectedAssecCollection  = @"currentSelectedAssecCollection";
 NSString *const KVC_SelectCollectionResultDict      = @"selectCollectionResultDict";
 NSString *const KVC_ItemWidth_Number                = @"itemWidth";
+NSString *const KVC_PhotoListIdentifiers            = @"photoListIdentifiers";
 
 @interface LYPhotoPickerController ()
 <
@@ -48,7 +49,9 @@ PHPhotoLibraryChangeObserver
     self = [super init];
     if (self) {
         _saveSelected = YES;
+        _supportMultiSelect = YES;
         _markType = LYPhotoListSelectMarkTypeNumber;
+        _collectionType = LYPhotoCollectionTypeAlbum|LYPhotoCollectionTypeSmartAlbum;
         _selectCollectionResultDict = [NSMutableDictionary dictionary];
         _lineCount = 3;
         _spacing = 5.0f;
@@ -146,8 +149,15 @@ PHPhotoLibraryChangeObserver
 }
 
 - (void)fetchDataAndLoadVC {
-    NSArray *photoList_ = [[LYPhotoHelper shareInstance] fetchAllPhotoList];
-    self.photoListIdentifiers = [[LYPhotoHelper shareInstance] fetchAllListObjectIdentifier];
+    NSArray *photoList_ = [[LYPhotoHelper shareInstance] fetchAllPhotoListWithCollectionType:self.collectionType];
+//    self.photoListIdentifiers = [[LYPhotoHelper shareInstance] fetchAllListObjectIdentifierWithCollectionType:self.collectionType];
+    
+    NSMutableArray *listIdentifiers = [NSMutableArray array];
+    for (LYPhotoListObject *listObject in photoList_) {
+        [listIdentifiers addObject:listObject.listIdentifier];
+    }
+    self.photoListIdentifiers = listIdentifiers;
+    
     LYPhotoListViewController *listVC = [[LYPhotoListViewController alloc] init];
     LYPhotoSmallViewController *smallVC = [[LYPhotoSmallViewController alloc] init];
     
@@ -157,7 +167,13 @@ PHPhotoLibraryChangeObserver
         listVC.selectedAlbumTitlesAndNumberDict = albumTitlesAndNumberDict;
     };
     
+    void(^containsPhotoListNamesBlock)(NSSet <NSString *> *containsPhotoListNames) = ^ (NSSet <NSString *> *containsPhotoListNames) {
+        @strongify(listVC)
+        listVC.containsPhotoListNames = containsPhotoListNames;
+    };
+    
     smallVC.selectedAlbumTitlesAndNumberBlock = selectedAlbumTitlesAndNumberBlock;
+    smallVC.containsPhotoListNamesBlock = containsPhotoListNamesBlock;
     
     LYPhotoListObject *list_ = nil;
     for (LYPhotoListObject *list in photoList_) {
@@ -212,7 +228,7 @@ PHPhotoLibraryChangeObserver
     
     if (!postPhotoListChangeNotification) return;
     
-    NSArray *listIdentifier = [[LYPhotoHelper shareInstance] fetchAllListObjectIdentifier];
+    NSArray *listIdentifier = [[LYPhotoHelper shareInstance] fetchAllListObjectIdentifierWithCollectionType:self.collectionType];
     
     if (listIdentifier.count != self.photoListIdentifiers.count) {
         //找到被删的／新增的

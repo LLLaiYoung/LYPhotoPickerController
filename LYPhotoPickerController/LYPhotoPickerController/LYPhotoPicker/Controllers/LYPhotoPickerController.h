@@ -10,6 +10,7 @@
 #import "MBProgressHUD.h"
 #import "LYPhotoMacro.h"
 #import "LYGCD.h"
+#import "LYPhotoHelper.h"
 
 extern NSString *const kAssetCollectionChangeNotification;
 extern NSString *const kPhotoListChangeNotification;
@@ -20,6 +21,7 @@ extern NSString *const kDeleteIdentifier;
 extern NSString *const KVC_CurrentSelectedAssecCollection;
 extern NSString *const KVC_SelectCollectionResultDict;
 extern NSString *const KVC_ItemWidth_Number;
+extern NSString *const KVC_PhotoListIdentifiers;
 
 
 typedef NS_ENUM(NSUInteger, LYPhotoListSelectMarkType) {
@@ -45,7 +47,13 @@ typedef NS_ENUM(NSUInteger, LYPhotoListSelectMarkType) {
 @property (nonatomic, copy) void(^senderBlock)(NSArray <LYPhotoObject *>* objects);
 /** list标注类型，如果 saveSelected 为 NO，那么此属性无效。默认 LYPhotoListSelectMarkTypeNumber  */
 @property (nonatomic, assign) LYPhotoListSelectMarkType markType;
+
+/** 相册集合类型，默认LYPhotoCollectionTypeAlbum|LYPhotoCollectionTypeSmartAlbum */
+@property (nonatomic, assign) LYPhotoCollectionType collectionType;//待完成
+
 /** 是否保存选择的，返回到listViewController的时候，默认YES */
 @property (nonatomic, assign) BOOL saveSelected;
+/** 是否支持多选，默认 YES */
+@property (nonatomic, assign) BOOL supportMultiSelect;//待完成
 
 @end

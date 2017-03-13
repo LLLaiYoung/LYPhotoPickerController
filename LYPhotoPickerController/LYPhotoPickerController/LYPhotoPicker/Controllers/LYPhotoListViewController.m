@@ -27,7 +27,7 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    self.photoList = [[LYPhotoHelper shareInstance] fetchAllPhotoList];
+    self.photoList = [[LYPhotoHelper shareInstance] fetchAllPhotoListWithCollectionType:[UIViewController photoPickerController].collectionType];
     [self.tableView reloadData];
     //* 解决TableViewCell左侧会有默认15像素的空白 */
     if ([_tableView respondsToSelector:@selector(setSeparatorInset:)]) {
@@ -87,7 +87,11 @@
     if ([UIViewController photoPickerController].saveSelected && [UIViewController photoPickerController].markType != LYPhotoListSelectMarkTypeNon) {
         LYPhotoListObject *listObject = self.photoList[indexPath.row];
         if ([UIViewController photoPickerController].markType == LYPhotoListSelectMarkTypeNumber) {
-            cell.count = [self selectedItemCountWithKey:listObject.photoTitle];
+            if ([UIViewController photoPickerController].markType == LYPhotoListSelectMarkTypeNumber) {
+                cell.count = [self selectedItemCountWithKey:listObject.photoTitle];
+            }
+        } else if ([UIViewController photoPickerController].markType == LYPhotoListSelectMarkTypeRedDot) {
+            cell.showRedDot = [self.containsPhotoListNames containsObject:listObject.photoTitle];
         }
     }
 }
@@ -119,8 +123,13 @@
                 @strongify(self)
                 self.selectedAlbumTitlesAndNumberDict = albumTitlesAndNumberDict;
             };
+            void(^containsPhotoListNamesBlock)(NSSet <NSString *> *containsPhotoListNames) = ^ (NSSet <NSString *> *containsPhotoListNames) {
+                @strongify(self)
+                self.containsPhotoListNames = containsPhotoListNames;
+            };
             @strongify(self)
             smallVC.selectedAlbumTitlesAndNumberBlock = selectedAlbumTitlesAndNumberBlock;
+            smallVC.containsPhotoListNamesBlock = containsPhotoListNamesBlock;
             [self.navigationController pushViewController:smallVC animated:YES];
         });
     }];
@@ -156,7 +165,7 @@
 
 - (void)photoListChangeNotification:(NSNotification *)noti {
     if (![[UIViewController currentViewController] isKindOfClass:[self class]]) return;
-    self.photoList = [[LYPhotoHelper shareInstance] fetchAllPhotoList];
+    self.photoList = [[LYPhotoHelper shareInstance] fetchAllPhotoListWithCollectionType:[UIViewController photoPickerController].collectionType];
     if (self.photoList.count == 0) {
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"无相册列表可选择" preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {

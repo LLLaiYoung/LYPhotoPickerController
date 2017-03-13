@@ -11,11 +11,13 @@
 #import "LYPhotoPickerCategory.h"
 
 static CGFloat const kSpacing = 5.0f;
+static CGFloat const kRedDotWidth = 10.0f;
 
 @interface LYPhotoListCell()
 @property (nonatomic, strong) UIImageView *imgView;
 @property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic, strong) UILabel *countLabel;
+@property (nonatomic, strong) CAShapeLayer *redDotLayer;
 @end
 
 @implementation LYPhotoListCell
@@ -25,6 +27,7 @@ static CGFloat const kSpacing = 5.0f;
     [self.contentView addSubview:self.imgView];
     [self.contentView addSubview:self.titleLabel];
     [self.contentView addSubview:self.countLabel];
+    [self.contentView.layer addSublayer:self.redDotLayer];
 }
 
 # pragma mark - Custom Accessors
@@ -58,6 +61,18 @@ static CGFloat const kSpacing = 5.0f;
     return _countLabel;
 }
 
+- (CAShapeLayer *)redDotLayer {
+    if (!_redDotLayer) {
+        _redDotLayer = [CAShapeLayer layer];
+        CGFloat x = self.contentView.width - 20.0f;
+        CGFloat y = (self.contentView.height - kRedDotWidth)/2.0f;
+        UIBezierPath *bezierPath = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(x, y, kRedDotWidth, kRedDotWidth) cornerRadius:kRedDotWidth/2.0f];
+        _redDotLayer.path = bezierPath.CGPath;
+        _redDotLayer.fillColor = [UIColor whiteColor].CGColor;
+    }
+    return _redDotLayer;
+}
+
 #pragma mark - Setter Methods
 
 - (void)setListObject:(LYPhotoListObject *)listObject {
@@ -83,7 +98,15 @@ static CGFloat const kSpacing = 5.0f;
     } else {
         self.countLabel.text = nil;
     }
-    
+}
+
+- (void)setShowRedDot:(BOOL)showRedDot {
+    _showRedDot = showRedDot;
+    if (showRedDot) {
+        self.redDotLayer.fillColor = [UIColor redColor].CGColor;
+    } else {
+        self.redDotLayer.fillColor = [UIColor whiteColor].CGColor;
+    }
 }
 
 # pragma mark - IBActions
