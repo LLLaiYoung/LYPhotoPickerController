@@ -59,7 +59,7 @@ NSCopying
 @interface LYPhotoListObject : NSObject
 /** 相册标题 */
 @property (nonatomic, copy) NSString *photoTitle;
-/** list唯一标识符 */
+/** list唯一标识符 == PHAssetCollection.localIdentifier*/
 @property (nonatomic, copy) NSString *listIdentifier;
 /** 该相册的照片总数 */
 @property (nonatomic, assign) NSUInteger photoCount;
@@ -67,6 +67,8 @@ NSCopying
 @property (nonatomic, strong) PHAsset *firstAsset;
 /** 通过该属性可以取得该相册的所有照片 */
 @property (nonatomic, strong) PHAssetCollection *assetCollection;
+
+@property (nonatomic, strong) PHFetchResult *result;
 
 @end
 

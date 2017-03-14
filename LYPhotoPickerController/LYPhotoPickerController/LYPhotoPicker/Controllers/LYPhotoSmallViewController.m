@@ -18,11 +18,8 @@ static CGFloat const bottomContainerViewHeight = 44.0f;
 static NSUInteger maxCount;
 /** key:PHAssetCollection.localIdentifier value:NSMutableArray 在删减的时候先匹配localIdentifier*/
 static NSMutableDictionary <NSString *, NSMutableArray <LYPhotoAssetObject *> *> *selectedItemDict;
-/** 选择的原图 */
-static NSMutableArray <LYPhotoObject *> *selectedOrigianlPhotoObjects;
-/** 选择的非原图 */
-static NSMutableArray <LYPhotoObject *> *selectedNonOriginalPhotoPbjects;
-/** key:PHAssetCollection.localIdentifier value:PHFetchResult，只增不删 */
+
+/** key:PHAssetCollection.localIdentifier value:PHFetchResult，在loadData 的时候从PhotoPicker读取，在 viewWillDisappear 的时候判断，如果当前collection中没有选择，那么就删除，如果已经选择就不删除 */
 static NSMutableDictionary <NSString *, PHFetchResult *> *selectedCollectionResultDict;
 
 /** 相册改变 */
@@ -33,6 +30,15 @@ static PHAssetCollection *currentSelectedAssecCollection;
 @property (nonatomic, strong) UIView *bottomContainerView;
 @property (nonatomic, strong) UIButton *previewBtn;
 @property (nonatomic, strong) UIButton *senderBtn;
+/** 记录是否第一次进入viewDidLayoutSubviews,因为滑动collectionView之后还会再次进入 */
+@property (nonatomic, assign) BOOL firstEnterViewDidLayoutSubviews;
+/** 如果是push操作，那么在 viewWillDisappear 直接return*/
+@property (nonatomic, assign, getter=isPush) BOOL push;
+/** 如果是sender操作，那么在 viewWillDisappear 直接return*/
+@property (nonatomic, assign, getter=isSender) BOOL sender;
+
+//* --------------------------Collection Change----------------------------- */
+
 
 @end
 
@@ -44,16 +50,19 @@ static PHAssetCollection *currentSelectedAssecCollection;
     [self initSubviews];
     [self resetSendBtnTitle];
     [self registerNotification];
+    _firstEnterViewDidLayoutSubviews = YES;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     NSArray *visiableItems = [self.smallCollectionView indexPathsForVisibleItems];
     [self.smallCollectionView reloadItemsAtIndexPaths:visiableItems];
+    self.push = NO;
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    if (self.isPush || self.isSender) return;
     if (![UIViewController photoPickerController].saveSelected) {//不保存
         [self removeAllObjects];
     } else {
@@ -67,7 +76,22 @@ static PHAssetCollection *currentSelectedAssecCollection;
             }
         }
     }
+    
+    //如果选择的集合中，没有包含当前这个，那么就删除，如果包含就不删除
+    if (![selectedItemDict.allKeys containsObject:currentSelectedAssecCollection.localIdentifier]) {
+        [selectedCollectionResultDict removeObjectForKey:currentSelectedAssecCollection.localIdentifier];
+        [[UIViewController photoPickerController] setValue:selectedCollectionResultDict forKey:KVC_SelectCollectionResultDict];
+    }
 }
+
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    if (_firstEnterViewDidLayoutSubviews) {//滑动cllectionView，还会再次进入。
+        [self.smallCollectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:self.fetchLYSmallAsset.count-1 inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
+        _firstEnterViewDidLayoutSubviews = NO;
+    }
+}
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
@@ -206,6 +230,7 @@ static PHAssetCollection *currentSelectedAssecCollection;
 #pragma mark - UICollectionViewDelegate
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    self.push = YES;
     LYPhotoBrowserViewController *browserVC = [[LYPhotoBrowserViewController alloc] init];
     browserVC.dataSource = _fetchLYSmallAsset.mutableCopy;
     browserVC.index = indexPath.row;
@@ -286,8 +311,6 @@ static PHAssetCollection *currentSelectedAssecCollection;
 
 - (void)removeAllObjects {
     [selectedItemDict removeAllObjects];
-    [selectedOrigianlPhotoObjects removeAllObjects];
-    [selectedNonOriginalPhotoPbjects removeAllObjects];
     [selectedCollectionResultDict removeAllObjects];
     maxCount = 0;
 }
@@ -344,14 +367,12 @@ static PHAssetCollection *currentSelectedAssecCollection;
 - (void)loadData {
     if (isNull(selectedItemDict)) {
         selectedItemDict = @{}.mutableCopy;
-        selectedOrigianlPhotoObjects = @[].mutableCopy;
-        selectedNonOriginalPhotoPbjects = @[].mutableCopy;
-        selectedCollectionResultDict = @{}.mutableCopy;
     }
     if (maxCount==0) {
         maxCount = [UIViewController photoPickerController].maxCount;
     }
     currentSelectedAssecCollection = [[UIViewController photoPickerController] valueForKey:KVC_CurrentSelectedAssecCollection];
+    selectedCollectionResultDict = [[UIViewController photoPickerController] valueForKey:KVC_SelectCollectionResultDict];
 }
 
 - (void)registerNotification {
@@ -446,18 +467,14 @@ static PHAssetCollection *currentSelectedAssecCollection;
 }
 
 - (void)resetSendBtnTitle {
-    //获取当前选择的 PHAssetCollection
     if (isNull(currentSelectedAssecCollection)) {
         return;
     }
-    //获取当前选择的 PHFetchResult
-    PHFetchResult *result = [[LYPhotoHelper shareInstance] fetchResultAssetsInAssetCollection:currentSelectedAssecCollection ascending:YES];
+
     NSArray *allLYPhotoAssetObjects = [self fetchAllSelectedLYPhotoAssetObjects];
     if (allLYPhotoAssetObjects.count != 0) {
         _previewBtn.enabled = YES;
         _senderBtn.enabled = YES;
-        //新增一个 PHFetchResult
-        [selectedCollectionResultDict setValue:result forKey:currentSelectedAssecCollection.localIdentifier];
         
         NSString *string = [NSString stringWithFormat:@"发送(%li)",allLYPhotoAssetObjects.count];
         [self.senderBtn setTitle:string forState:UIControlStateNormal];
@@ -466,9 +483,6 @@ static PHAssetCollection *currentSelectedAssecCollection;
         _senderBtn.enabled = NO;
         [self.senderBtn setTitle:@"发送" forState:UIControlStateNormal];
     }
-    
-    //更新选择的 PHFetchResult
-    [[UIViewController photoPickerController] setValue:selectedCollectionResultDict forKey:KVC_SelectCollectionResultDict];
 }
 
 - (void)clickedSenderWithOriginal:(BOOL)original {
@@ -476,21 +490,24 @@ static PHAssetCollection *currentSelectedAssecCollection;
         [MBProgressHUD showSmallHUD];
         @weakify(self)
         [LYGCDQueue executeInGlobalQueue:^{
+            NSMutableArray <LYPhotoObject *> *originalPhotoObjects = [NSMutableArray array];
+            NSMutableArray <LYPhotoObject *> *nonOriginalPhotoObjects = [NSMutableArray array];
             //* 模型转换 */
             for (LYPhotoAssetObject *assetObject in [self fetchAllSelectedLYPhotoAssetObjects]) {
                 NSArray <LYPhotoObject *> *photoObjects = [[LYPhotoHelper shareInstance] transformLYAssetPhoto:assetObject];
-                [selectedOrigianlPhotoObjects addObject:photoObjects.firstObject];
-                [selectedNonOriginalPhotoPbjects addObject:photoObjects.lastObject];
+                [originalPhotoObjects addObject:photoObjects.firstObject];
+                [nonOriginalPhotoObjects addObject:photoObjects.lastObject];
             }
             
             //* 将数据深拷贝一份，防止数据还没发送出去,原始数据就被删除了 */
             NSArray *objects = nil;
             if (original) {
-                objects = [[NSArray alloc] initWithArray:selectedOrigianlPhotoObjects.copy copyItems:YES];
+                objects = [[NSArray alloc] initWithArray:originalPhotoObjects.copy copyItems:YES];
             } else {
-                objects = [[NSArray alloc] initWithArray:selectedNonOriginalPhotoPbjects.copy copyItems:YES];
+                objects = [[NSArray alloc] initWithArray:nonOriginalPhotoObjects.copy copyItems:YES];
             }
             
+            self.sender = YES;
             dispatch_async_on_main_queue(^{
                 @strongify(self)
                 [UIViewController photoPickerController].senderBlock(objects);
@@ -606,7 +623,7 @@ static PHAssetCollection *currentSelectedAssecCollection;
 }
 
 #pragma mark - Notification
-
+//如果不是当前collection也应该刷新，因为可能被删的collection 中的对象，就是已经选择的对象。如果不刷新的话就会无法在已经选择的集合中删除在设备“照片”中删除的对象
 - (void)assetCollectionChangeNotification:(NSNotification *)noti {
     PHFetchResult *afterResult = noti.userInfo[kAfter];
     NSString *key = noti.userInfo[kKey];
@@ -621,7 +638,6 @@ static PHAssetCollection *currentSelectedAssecCollection;
         if ([currentSelectedAssecCollection.localIdentifier isEqualToString:key]) {//是当前才滚动到最后
             [self.smallCollectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:self.fetchLYSmallAsset.count-1 inSection:0] atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
         }
-        
     }
     [self handleDeleteDevicePhotoObjectWithAfterResult:afterResult key:key];
 }

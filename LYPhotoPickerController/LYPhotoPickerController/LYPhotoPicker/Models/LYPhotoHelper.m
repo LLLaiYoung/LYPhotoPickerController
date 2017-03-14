@@ -400,6 +400,7 @@ static CGFloat const photoCompressionQuality = 0.8;
                 list.firstAsset = result.firstObject;
                 list.assetCollection = collection;
                 list.listIdentifier = collection.localIdentifier;
+                list.result = result;
                 [photoList addObject:list];
             }
         }

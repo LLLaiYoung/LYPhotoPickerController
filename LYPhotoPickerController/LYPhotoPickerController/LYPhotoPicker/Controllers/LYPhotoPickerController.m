@@ -29,13 +29,19 @@ NSString *const KVC_PhotoListIdentifiers            = @"photoListIdentifiers";
 <
 PHPhotoLibraryChangeObserver
 >
-/** 外界不用关心这个属性，相册改变，在哪几个 PHFetchResult 中选择了（包含当前进入的PHFetchResult(可能没有选择)），当收到 photoLibraryDidChange 通知的时候遍历 selectCollectionResults 发通知 , key:localIdentifier value:PHFetchResult */
+/** 外界不用关心这个属性，相册改变
+    1、key:localIdentifier value:PHFetchResult
+    2、在哪几个 PHFetchResult 中选择了（包含当前进入的PHFetchResult(不管选择还是没选择)）
+    3、在list 界面push 到 small 的时候就应该讲当前选择的fetchResult加入到selectCollectionResultDict
+    4、在small控制器 willDisAppear 的时候就应该要检查一下，是否需要将这个对象移除（如果对应的collection 中没有选择任何对象，则当前对象移除，反之，如果选择了，就不移除。
+    5、当收到 photoLibraryDidChange 通知的时候遍历 selectCollectionResults 发通知
+ */
 @property (nonatomic, strong)  NSMutableDictionary <NSString *,PHFetchResult *> *selectCollectionResultDict;
 
 /** 外界不用关心这个属性，相册改变，当前选择的 PHAssetCollection，用于获取当前PHAssetCollection内容 */
 @property (nonatomic, strong) PHAssetCollection *currentSelectedAssecCollection;
 
-/** 相册改变，存所有list的identifier，当 list 个数发生改变 找到被删的，如果是新增的话就发空对象（不包含元素的对象），在收到通知的时候，如果收到的对象不为空的话，就遍历处理，为nil的话就不刷新 */
+/** 相册改变，存所有list的identifier，当 list 个数发生改变 找到被删的，如果是新增的话就发空对象（不包含元素的对象），在收到通知的时候，如果收到的对象不为空的话，就遍历处理，为空的话就不刷新 */
 @property (nonatomic, strong) NSArray <NSString *> *photoListIdentifiers;
 
 @property (nonatomic, strong) NSNumber *itemWidth;
@@ -193,7 +199,7 @@ PHPhotoLibraryChangeObserver
         dispatch_async_on_main_queue(^{
             [MBProgressHUD dismissHUD];
             @strongify(self)
-            self.selectCollectionResultDict[list_.assetCollection.localIdentifier] = [[LYPhotoHelper shareInstance] fetchResultAssetsInAssetCollection:list_.assetCollection ascending:YES];
+            self.selectCollectionResultDict[list_.listIdentifier] = list_.result;
             self.currentSelectedAssecCollection = list_.assetCollection;
             self.viewControllers = @[listVC,smallVC];
         });

@@ -33,10 +33,6 @@
     if ([_tableView respondsToSelector:@selector(setSeparatorInset:)]) {
         [_tableView setSeparatorInset:UIEdgeInsetsZero];
     }
-    
-    if (![UIViewController photoPickerController].saveSelected) {
-        [[[LYPhotoSmallViewController alloc] init] removeAllObjects];
-    }
 }
 
 - (void)didReceiveMemoryWarning {
@@ -116,7 +112,13 @@
     @weakify(self)
     [LYGCDQueue executeInGlobalQueue:^{
         smallVC.fetchLYSmallAsset = [[LYPhotoHelper shareInstance] fetchLYPhotoAssetObjectInAssetCollection:listObject.assetCollection ascending:YES];
+        
         [[UIViewController photoPickerController] setValue:listObject.assetCollection forKey:KVC_CurrentSelectedAssecCollection];
+        
+        NSMutableDictionary *dict = [[UIViewController photoPickerController] valueForKey:KVC_SelectCollectionResultDict];
+        [dict setObject:listObject.result forKey:listObject.listIdentifier];
+        [[UIViewController photoPickerController] setValue:dict forKey:KVC_SelectCollectionResultDict];
+        
         dispatch_async_on_main_queue(^{
             [MBProgressHUD dismissHUD];
             void(^selectedAlbumTitlesAndNumberBlock)(NSDictionary <NSString *, NSNumber *> *albumTitlesAndNumberDict) = ^(NSDictionary <NSString *, NSNumber *> *albumTitlesAndNumberDict) {

@@ -45,6 +45,7 @@ typedef NS_ENUM(NSUInteger, LYPhotoListSelectMarkType) {
 @property (nonatomic, assign) CGFloat spacing;
 
 @property (nonatomic, copy) void(^senderBlock)(NSArray <LYPhotoObject *>* objects);
+
 /** list标注类型，如果 saveSelected 为 NO，那么此属性无效。默认 LYPhotoListSelectMarkTypeNumber  */
 @property (nonatomic, assign) LYPhotoListSelectMarkType markType;
 
@@ -53,6 +54,7 @@ typedef NS_ENUM(NSUInteger, LYPhotoListSelectMarkType) {
 
 /** 是否保存选择的，返回到listViewController的时候，默认YES */
 @property (nonatomic, assign) BOOL saveSelected;
+
 /** 是否支持多选，默认 YES */
 @property (nonatomic, assign) BOOL supportMultiSelect;//待完成
 
