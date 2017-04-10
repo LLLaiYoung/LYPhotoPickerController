@@ -74,7 +74,6 @@ static PHAssetCollection *currentSelectedAssecCollection;
             [self.smallCollectionView reloadItemsAtIndexPaths:@[self.lastIndexPath]];
         }
     }
-//    [self.smallCollectionView reloadItemsAtIndexPaths:visiableItems];
     self.push = NO;
 }
 
@@ -122,7 +121,7 @@ static PHAssetCollection *currentSelectedAssecCollection;
 
 #pragma mark - LayoutSubviews
 - (void)initSubviews {
-    if (![[LYPhotoHelper shareInstance] albumAuthority]) {
+    if (![UIDevice albumAuthority]) {
         [self showAlertControllerWithAlertMsg:@"请在iPhone的\"设置-隐私-相册\"中允许访问相册" actionBlock:^{
             [[UIViewController currentViewController] dismissViewControllerAnimated:YES completion:NULL];
         }];
@@ -456,20 +455,19 @@ static PHAssetCollection *currentSelectedAssecCollection;
     if (selectedItemDict.count == 0) {
         return nil;
     }
-    NSMutableArray *operationTitles = [NSMutableArray array];
+    NSMutableArray *operationImageFileNames = [NSMutableArray array];
     for (NSArray *assetObjects in selectedItemDict.allValues) {
         for (LYPhotoAssetObject *assetObject in assetObjects) {
-            [operationTitles addObject:assetObject.imageFileName];
+            [operationImageFileNames addObject:assetObject.imageFileName];
         }
     }
     
     NSMutableSet *mutableNames = [NSMutableSet set];
     NSArray <LYPhotoListObject *> *lists = [[LYPhotoHelper shareInstance] fetchAllPhotoListWithCollectionType:[UIViewController photoPickerController].collectionType];
-#warning 还需要优化
-    for (NSString *titleName in operationTitles) {
+    for (NSString *imageFileName in operationImageFileNames) {
         for (LYPhotoListObject *listObject in lists) {
-            NSArray *collectionFilenames = [[LYPhotoHelper shareInstance] fetchAllCollectionFilenameWithCollection:listObject.assetCollection];
-            if ([collectionFilenames containsObject:titleName]) {
+            NSArray *collectionFilenames = [[LYPhotoHelper shareInstance] fetchAssetCollectionAllImageFileNmaesWithKey:listObject.listIdentifier];
+            if ([collectionFilenames containsObject:imageFileName]) {
                 [mutableNames addObject:listObject.photoTitle];
             }
         }

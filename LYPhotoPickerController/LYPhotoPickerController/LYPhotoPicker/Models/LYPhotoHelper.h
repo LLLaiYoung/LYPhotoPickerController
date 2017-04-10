@@ -147,12 +147,6 @@ typedef NS_OPTIONS(NSUInteger, LYPhotoCollectionType) {
 /** 转换图片大小 */
 - (NSString *)transformSizeStringWithDataLength:(NSInteger)length;
 
-/** 相册权限 */
--(BOOL)albumAuthority;
-
-/** 相机权限 */
--(BOOL)cameraAuthority;
-
 /** 判断Asset是存储在iCloud */
 - (BOOL)judgeAssetisInICloud:(PHAsset *)asset;
 
@@ -161,5 +155,27 @@ typedef NS_OPTIONS(NSUInteger, LYPhotoCollectionType) {
 
 /** 根据 asset 计算图片的比例 */
 - (CGSize)calculateSizeWithAsset:(PHAsset *)asset;
+
+@end
+
+#pragma mark - LYPhotoHelper (CacheFileName)
+
+@interface LYPhotoHelper (CacheFileName)
+
+- (void)cacheAllFileName;
+
+- (void)updateAllImageFilenamesWithLYPhotoListObject:(LYPhotoListObject *)listObject;
+
+- (void)updateAllImageFilenamesWithKey:(NSString *)key imageFileName:(NSString *)fileName;
+
+- (NSArray <NSString *> *)fetchAssetCollectionAllImageFileNmaesWithKey:(NSString *)key;
+
+@end
+
+#pragma mark - NSString (LYPhotoHelper)
+
+@interface NSString (LYPhotoHelper)
+
+- (BOOL)photo;
 
 @end

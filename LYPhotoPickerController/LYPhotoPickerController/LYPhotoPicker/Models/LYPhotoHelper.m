@@ -68,6 +68,9 @@ static CGFloat const photoCompressionQuality = 0.8;
 
 @property (nonatomic, strong) NSArray *lyPhotoListCache;
 
+/** key:localIdentifier value:imageFileName */
+@property (nonatomic, strong) NSMutableDictionary <NSString *, NSMutableArray <NSString *> *> *allImageFileNameDic;
+
 @end
 
 @implementation LYPhotoHelper
@@ -246,8 +249,7 @@ static CGFloat const photoCompressionQuality = 0.8;
         @strongify(self)
         assetObject.assetCollectionIdentifier = self.assetCollectionIdentifier;
         assetObject.burstIdentifier = obj.burstIdentifier;
-        if ([assetObject.imageFileName containsString:@".PNG"]
-            || [assetObject.imageFileName containsString:@".JPG"]) {
+        if ([assetObject.imageFileName photo]) {
             assetObject.asset = obj;
             [lyAssets addObject:assetObject];
         }
@@ -280,7 +282,7 @@ static CGFloat const photoCompressionQuality = 0.8;
 }
 
 - (NSArray <NSString *> *)fetchAllListObjectIdentifierWithCollectionType:(LYPhotoCollectionType)collectionType {
-   NSArray <LYPhotoListObject *> *list = [[LYPhotoHelper shareInstance] fetchAllPhotoListNonGotoCacheWithCollectionType:collectionType];
+   NSArray <LYPhotoListObject *> *list = [self fetchAllPhotoListNonGotoCacheWithCollectionType:collectionType];
     NSMutableArray <NSString *> *listIdentifiers = [NSMutableArray array];
     for (LYPhotoListObject *listObject in list) {
         [listIdentifiers addObject:listObject.listIdentifier];
@@ -291,7 +293,7 @@ static CGFloat const photoCompressionQuality = 0.8;
 - (NSSet *)fetchAllImageNamesInPhotoListWithCollectionType:(LYPhotoCollectionType)collectionType {
     NSMutableSet *allImageNames = [NSMutableSet set];
     NSMutableArray *allAssets = [NSMutableArray array];
-    NSArray <LYPhotoListObject *> *photoList = [[LYPhotoHelper shareInstance] fetchAllPhotoListWithCollectionType:collectionType];
+    NSArray <LYPhotoListObject *> *photoList = [self fetchAllPhotoListWithCollectionType:collectionType];
     for (LYPhotoListObject *listObject in photoList) {
         NSArray *assets_ = [[LYPhotoHelper shareInstance] fetchLYPhotoAssetObjectInAssetCollection:listObject.assetCollection ascending:YES];
         [allAssets addObject:assets_];
@@ -353,22 +355,6 @@ static CGFloat const photoCompressionQuality = 0.8;
         return [NSString stringWithFormat:@"%.1fM", (float)length/(1024*1024)];
     else
         return [NSString stringWithFormat:@"%.1fG", (float)length/(1024*1024*1024)];
-}
-
--(BOOL)albumAuthority {
-    PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
-    if (status == PHAuthorizationStatusRestricted || status == PHAuthorizationStatusDenied) {
-        return NO;
-    }
-    return YES;
-}
-
--(BOOL)cameraAuthority {
-    AVAuthorizationStatus status = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
-    if (status == AVAuthorizationStatusRestricted || status == AVAuthorizationStatusDenied) {
-        return NO;
-    }
-    return YES;
 }
 
 - (BOOL)judgeAssetisInICloud:(PHAsset *)asset {
@@ -630,6 +616,7 @@ static NSInteger queueIndex = 0;
     [self.originalImageCache removeAllObjects];
     [self.downloadOrigList removeAllObjects];
     [self.downloadList removeAllObjects];
+    [self.allImageFileNameDic removeAllObjects];
     self.serialQueues = nil;
 }
 
@@ -684,6 +671,64 @@ static NSInteger queueIndex = 0;
         _serialQueues = array.copy;
     }
     return _serialQueues;
+}
+
+- (NSMutableDictionary<NSString *,NSMutableArray<NSString *> *> *)allImageFileNameDic {
+    if (!_allImageFileNameDic) {
+        _allImageFileNameDic = [NSMutableDictionary dictionary];
+    }
+    return _allImageFileNameDic;
+}
+
+@end
+
+
+#pragma mark - LYPhotoHelper (CacheFileName)
+
+@implementation LYPhotoHelper (CacheFileName)
+
+- (void)cacheAllFileName {
+    [self.allImageFileNameDic removeAllObjects];
+    [LYGCDQueue executeInGlobalQueue:^{
+        NSArray *photoList = [self fetchAllPhotoListWithCollectionType:[UIViewController photoPickerController].collectionType];
+        for (LYPhotoListObject *list in photoList) {
+            [self updateAllImageFilenamesWithLYPhotoListObject:list];
+        }
+    }];
+}
+
+- (void)updateAllImageFilenamesWithLYPhotoListObject:(LYPhotoListObject *)listObject {
+    NSMutableArray <NSString *> *allImageFileNames = [self fetchAllCollectionFilenameWithCollection:listObject.assetCollection].mutableCopy;
+    if (allImageFileNames.count != 0) {
+        self.allImageFileNameDic[listObject.listIdentifier] = allImageFileNames;
+    }
+}
+
+- (void)updateAllImageFilenamesWithKey:(NSString *)key imageFileName:(NSString *)fileName {
+    if ([fileName photo]) {
+        NSMutableArray *imageFilenames = self.allImageFileNameDic[key];
+        if ([imageFilenames containsObject:fileName]) {
+            [imageFilenames removeObject:fileName];
+        } else {
+            [imageFilenames addObject:fileName];
+        }
+    }
+}
+
+- (NSArray<NSString *> *)fetchAssetCollectionAllImageFileNmaesWithKey:(NSString *)key {
+    return self.allImageFileNameDic[key].copy;
+}
+
+@end
+
+#pragma mark - NSString (LYPhotoHelper)
+
+@implementation NSString (LYPhotoHelper)
+
+/** 是否为图片 */
+- (BOOL)photo {
+   return ([self containsString:@".PNG"]
+           || [self containsString:@".JPG"]);
 }
 
 @end

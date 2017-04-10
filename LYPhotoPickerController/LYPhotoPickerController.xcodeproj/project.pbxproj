@@ -27,6 +27,7 @@
 		83277DCF1E72CEBF00752CCF /* LYPhotoListCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DC11E72CEBF00752CCF /* LYPhotoListCell.m */; };
 		83277DD01E72CEBF00752CCF /* LYPhotoSmallCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DC31E72CEBF00752CCF /* LYPhotoSmallCell.m */; };
 		83277DD41E72E2B800752CCF /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 83277DD31E72E2B800752CCF /* MBProgressHUD.m */; };
+		83A7ECEF1E9BAE4000906D00 /* UIDevice+Authority.m in Sources */ = {isa = PBXBuildFile; fileRef = 83A7ECEE1E9BAE4000906D00 /* UIDevice+Authority.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -71,6 +72,8 @@
 		83277DC31E72CEBF00752CCF /* LYPhotoSmallCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LYPhotoSmallCell.m; sourceTree = "<group>"; };
 		83277DD21E72E2B800752CCF /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		83277DD31E72E2B800752CCF /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
+		83A7ECED1E9BAE4000906D00 /* UIDevice+Authority.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIDevice+Authority.h"; sourceTree = "<group>"; };
+		83A7ECEE1E9BAE4000906D00 /* UIDevice+Authority.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIDevice+Authority.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,6 +147,8 @@
 				83277DA31E72CEBF00752CCF /* LYPhotoPickerCategory.h */,
 				83277DA41E72CEBF00752CCF /* UIView+LYPhotoPicker.h */,
 				83277DA51E72CEBF00752CCF /* UIView+LYPhotoPicker.m */,
+				83A7ECED1E9BAE4000906D00 /* UIDevice+Authority.h */,
+				83A7ECEE1E9BAE4000906D00 /* UIDevice+Authority.m */,
 				83277DA61E72CEBF00752CCF /* UIViewController+LYPhotoPicker.h */,
 				83277DA71E72CEBF00752CCF /* UIViewController+LYPhotoPicker.m */,
 			);
@@ -291,6 +296,7 @@
 				83277DD01E72CEBF00752CCF /* LYPhotoSmallCell.m in Sources */,
 				83277DC91E72CEBF00752CCF /* LYPhotoSmallViewController.m in Sources */,
 				83277DD41E72E2B800752CCF /* MBProgressHUD.m in Sources */,
+				83A7ECEF1E9BAE4000906D00 /* UIDevice+Authority.m in Sources */,
 				83277DCB1E72CEBF00752CCF /* LYGCDSemaphore.m in Sources */,
 				83277DCC1E72CEBF00752CCF /* LYPhotoHelper.m in Sources */,
 				83277DC71E72CEBF00752CCF /* LYPhotoListViewController.m in Sources */,
@@ -458,6 +464,7 @@
 				83277D6B1E72BA7E00752CCF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

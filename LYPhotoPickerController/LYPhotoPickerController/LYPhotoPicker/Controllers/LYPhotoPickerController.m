@@ -50,6 +50,8 @@ PHPhotoLibraryChangeObserver
 
 @implementation LYPhotoPickerController
 
+# pragma mark - Lifecycle
+
 - (instancetype)init
 {
     self = [super init];
@@ -72,6 +74,14 @@ PHPhotoLibraryChangeObserver
     [self authorization];
     [self registerNotification];
 }
+
+- (void)dealloc {
+    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
+    _selectCollectionResultDict = nil;
+    _currentSelectedAssecCollection = nil;
+}
+
+#pragma mark - Private Methods
 
 - (void)authorization {
     PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
@@ -109,27 +119,21 @@ PHPhotoLibraryChangeObserver
     }
 }
 
-- (void)clickedDismissBtn:(UIButton *)sender {
-    [self dismissViewControllerAnimated:YES completion:NULL];
-}
-
-- (void)authorizationStatusDenied {
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"请在iPhone的\"设置-隐私-相册\"中允许访问相册" preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [self dismissViewControllerAnimated:YES completion:NULL];
-    }];
-    [alertController addAction:cancelAction];
-    [[UIViewController currentViewController] presentViewController:alertController animated:YES completion:NULL];
-}
-
 - (void)registerNotification {
     [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
 }
 
-- (void)dealloc {
-    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
-    _selectCollectionResultDict = nil;
-    _currentSelectedAssecCollection = nil;
+/** 缓存所有list对象里面的assecCollection对象的文件名 */
+- (void)cacheAllImageFileNamesWithSelectedListObject:(LYPhotoListObject *)list_ allPhotoList:(NSMutableArray <LYPhotoListObject *>*)photoLists {
+    //* 当前的在主线程缓存 */
+    [[LYPhotoHelper shareInstance] updateAllImageFilenamesWithLYPhotoListObject:list_];
+    [photoLists removeObject:list_];
+    //* 其余的在全局队列缓存 */
+    for (LYPhotoListObject *listObject in photoLists) {
+        [LYGCDQueue executeInGlobalQueue:^{
+            [[LYPhotoHelper shareInstance] updateAllImageFilenamesWithLYPhotoListObject:listObject];
+        }];
+    }
 }
 
 /** 请求权限 */
@@ -190,6 +194,9 @@ PHPhotoLibraryChangeObserver
     if (!list_) {
         list_ = photoList_.firstObject;
     }
+    
+    [self cacheAllImageFileNamesWithSelectedListObject:list_ allPhotoList:photoList_.mutableCopy];
+    
     smallVC.smallTitle = list_.photoTitle;
     [MBProgressHUD showLargeHUD:@"正在加载..."];
     @weakify(self)
@@ -204,6 +211,23 @@ PHPhotoLibraryChangeObserver
         });
     }];
 }
+
+# pragma mark - IBActions
+
+- (void)clickedDismissBtn:(UIButton *)sender {
+    [self dismissViewControllerAnimated:YES completion:NULL];
+}
+
+- (void)authorizationStatusDenied {
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"请在iPhone的\"设置-隐私-相册\"中允许访问相册" preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [self dismissViewControllerAnimated:YES completion:NULL];
+    }];
+    [alertController addAction:cancelAction];
+    [[UIViewController currentViewController] presentViewController:alertController animated:YES completion:NULL];
+}
+
+#pragma mark - Custom Getter
 
 - (NSNumber *)itemWidth {
     if (_lineCount > 4) _lineCount  = 4;
@@ -239,10 +263,13 @@ PHPhotoLibraryChangeObserver
 - (void)postAssetCollectionChangeNotificationWithCollectionChanges:(PHFetchResultChangeDetails *)collectionChanges key:(NSString *)key {
     /** 获取当前选择collection的所有唯一标识符 */
     NSArray *allLocalIdentifier = [[LYPhotoHelper shareInstance] fetchAllCollectionLocalIdentifierWithCollection:self.currentSelectedAssecCollection];
+    
     /** 获取改变了的标识符 */
     NSArray <PHAsset *> *changeAsset = [collectionChanges changedObjects];
     NSMutableArray *changeIdentifiers = @[].mutableCopy;
     for (PHAsset *asset in changeAsset) {
+        NSString *imageFileName = [asset valueForKey:@"filename"];
+        [[LYPhotoHelper shareInstance] updateAllImageFilenamesWithKey:key imageFileName:imageFileName];
         [changeIdentifiers addObject:asset.localIdentifier];
     }
     /** 如果当前选择的所有标识符里面包含改变的，则是从icloud下载，就不应该发通知 */
@@ -283,6 +310,9 @@ PHPhotoLibraryChangeObserver
         if (add) {
             [set2 removeAllObjects];
         }
+        
+        [[LYPhotoHelper shareInstance] cacheAllFileName];
+        
         dispatch_async_on_main_queue(^{
             [[NSNotificationCenter defaultCenter] postNotificationName:kPhotoListChangeNotification object:nil userInfo:@{kDeleteIdentifier:set2}];
         });

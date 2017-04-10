@@ -11,5 +11,6 @@
 
 #import "UIView+LYPhotoPicker.h"
 #import "UIViewController+LYPhotoPicker.h"
+#import "UIDevice+Authority.h"
 
 #endif /* LYPhotoPickerCategory_h */
