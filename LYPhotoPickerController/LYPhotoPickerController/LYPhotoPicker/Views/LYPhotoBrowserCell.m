@@ -112,5 +112,11 @@
     }
 }
 
+- (void)prepareForReuse {
+    [super prepareForReuse];
+    self.scrollView.imageView.image = nil;
+    [self.activityIndicatorView removeFromSuperview];
+}
+
 @end
 

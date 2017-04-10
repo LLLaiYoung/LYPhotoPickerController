@@ -242,7 +242,7 @@ static CGFloat const photoCompressionQuality = 0.8;
     @weakify(self)
     [result enumerateObjectsUsingBlock:^(PHAsset * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         LYPhotoAssetObject *assetObject = [[LYPhotoAssetObject alloc] init];
-        assetObject.imageFileName = [obj valueForKey:@"filename"];//使用KVC来获取filename，使用PHAssetResource获取严重影响用户体验，200张耗时3s
+        assetObject.imageFileName = [obj valueForKey:@"filename"];
         @strongify(self)
         assetObject.assetCollectionIdentifier = self.assetCollectionIdentifier;
         assetObject.burstIdentifier = obj.burstIdentifier;
@@ -263,6 +263,18 @@ static CGFloat const photoCompressionQuality = 0.8;
     PHFetchResult *result = [self fetchResultAssetsInAssetCollection:assetCollection ascending:YES];
     [result enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [fileNames addObject:[obj valueForKey:@"filename"]];
+    }];
+    return fileNames.copy;
+}
+
+- (NSArray <NSString *> *)fetchAllCollectionLocalIdentifierWithCollection:(PHAssetCollection *)assetCollection {
+    if (isNull(assetCollection)) {
+        return nil;
+    }
+    NSMutableArray *fileNames = [NSMutableArray array];
+    PHFetchResult *result = [self fetchResultAssetsInAssetCollection:assetCollection ascending:YES];
+    [result enumerateObjectsUsingBlock:^(PHAsset * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [fileNames addObject:obj.localIdentifier];
     }];
     return fileNames.copy;
 }
@@ -386,6 +398,7 @@ static CGFloat const photoCompressionQuality = 0.8;
 #pragma mark - Private
 
 - (NSArray <LYPhotoListObject *>*)fetchAssetCollectionWithType:(PHAssetCollectionType)type subtype:(PHAssetCollectionSubtype)subtype {
+    /** PHFetchOptions 的 predicate 过滤结果 */
     PHFetchResult *smartAlbum = [PHAssetCollection fetchAssetCollectionsWithType:type subtype:subtype options:nil];
     NSMutableArray<LYPhotoListObject *> * photoList = [NSMutableArray array];
     [smartAlbum enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull collection, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -394,7 +407,7 @@ static CGFloat const photoCompressionQuality = 0.8;
             PHFetchResult * result = [self fetchResultAssetsInAssetCollection:collection ascending:NO];
             if (result.count > 0) {
                 LYPhotoListObject * list = [[LYPhotoListObject alloc]init];
-                //                list.title = [self transformAblumTitle:collection.localizedTitle];
+//                list.title = [self transformAblumTitle:collection.localizedTitle];
                 list.photoTitle = collection.localizedTitle;
                 list.photoCount = result.count;
                 list.firstAsset = result.firstObject;
@@ -413,42 +426,48 @@ static CGFloat const photoCompressionQuality = 0.8;
              makeResizeMode:(PHImageRequestOptionsResizeMode)resizeMode
                  smallImage:(BOOL)small
                  completion:(void (^)(UIImage *assetImage,NSString *imageFileName))completion {
+    static PHImageRequestID requestID = -1;
+    NSLog(@"requestBefore_Image %i",requestID);
+    if (requestID >= 1) {
+        [[PHCachingImageManager defaultManager] cancelImageRequest:requestID];
+    }
+
     PHImageRequestOptions *option = [[PHImageRequestOptions alloc] init];
-    /**
-     resizeMode：对请求的图像怎样缩放。有三种选择：None，不缩放；Fast，尽快地提供接近或稍微大于要求的尺寸；Exact，精准提供要求的尺寸。
-     deliveryMode：图像质量。有三种值：Opportunistic，在速度与质量中均衡；HighQualityFormat，不管花费多长时间，提供高质量图像；FastFormat，以最快速度提供好的质量。
-     这个属性只有在 synchronous 为 true 时有效。
-     */
     option.resizeMode = resizeMode;//控制照片尺寸
-    option.deliveryMode = PHImageRequestOptionsDeliveryModeFastFormat;//控制照片质量
-    option.synchronous = YES;
+    option.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;//控制照片质量
+//    option.synchronous = YES;//NO 很模糊
     option.networkAccessAllowed = YES;
     
     NSString *imageFileName = [asset valueForKey:@"filename"];
     dispatch_queue_t queue = [self fetchSerialQueue];
+    if (small) {
+        option = nil;
+    }
     @weakify(self)
     dispatch_async(queue, ^{
-        [[PHCachingImageManager defaultManager] requestImageForAsset:asset targetSize:size contentMode:PHImageContentModeAspectFit options:option resultHandler:^(UIImage * _Nullable image, NSDictionary * _Nullable info) {
+        requestID = [[PHCachingImageManager defaultManager] requestImageForAsset:asset targetSize:size contentMode:PHImageContentModeAspectFit options:option resultHandler:^(UIImage * _Nullable image, NSDictionary * _Nullable info) {
             @strongify(self)
-            BOOL originalImage = size.width == -1 && size.height == -1;
-            if (originalImage) {//原图
-                if ([self.downloadOrigList containsObject:imageFileName] && isNull(image)) {
-                    [self.downloadOrigList removeObject:imageFileName];
-                }
-            } else {
-                if ([self.downloadList containsObject:imageFileName] && isNull(image)) {//当下载队列包含的时候，如果image为nil，则删除队列里面的下载对象
-                    [self.downloadList removeObject:imageFileName];
-                }
-            }
-            if (image && !small) {//当image有值并且small为NO（不是小图）的时候保存
-                if (originalImage) {//原图
-                    [self.originalImageCache setObject:image forKey:imageFileName];
+            BOOL finined = ![[info objectForKey:PHImageCancelledKey] boolValue] && ![info objectForKey:PHImageErrorKey];
+            if (finined) {
+                if ([self judgeOriginSize:size]) {//原图
+                    if ([self.downloadOrigList containsObject:imageFileName] && isNull(image)) {
+                        [self.downloadOrigList removeObject:imageFileName];
+                    }
                 } else {
-                    [self.imageCache setObject:image forKey:imageFileName];
+                    if ([self.downloadList containsObject:imageFileName] && isNull(image)) {//当下载队列包含的时候，如果image为nil，则删除队列里面的下载对象
+                        [self.downloadList removeObject:imageFileName];
+                    }
                 }
-            }
-            if (completion) {
-                completion(image,imageFileName);
+                if (image && !small) {//当image有值并且small为NO（不是小图）的时候保存
+                    if ([self judgeOriginSize:size]) {//原图
+                        [self.originalImageCache setObject:image forKey:imageFileName];
+                    } else {
+                        [self.imageCache setObject:image forKey:imageFileName];
+                    }
+                }
+                if (completion) {
+                    completion(image,imageFileName);
+                }
             }
         }];
     });
@@ -457,6 +476,12 @@ static CGFloat const photoCompressionQuality = 0.8;
 - (void)requsetImageDataInAsset:(PHAsset *)asset
                  makeResizeMode:(PHImageRequestOptionsResizeMode)resizeMode
                      completion:(void (^)(NSData *assetImageData,NSString *imageFileName))completion  {
+    static PHImageRequestID requestID = -1;
+    NSLog(@"requestBefore_Data %i",requestID);
+    if (requestID >= 1) {
+        [[PHCachingImageManager defaultManager] cancelImageRequest:requestID];
+    }
+    
     NSString *imageFileName = [asset valueForKey:@"filename"];
     if (![self.downloadOrigList containsObject:imageFileName]) {//没有在下载列表
         [self.downloadOrigList addObject:imageFileName];
@@ -466,16 +491,19 @@ static CGFloat const photoCompressionQuality = 0.8;
             //option.deliveryMode 在请求为 requestImageDataForAsset 的时候就被忽略了
             option.synchronous = YES;
             option.networkAccessAllowed = YES;
-            [[PHCachingImageManager defaultManager] requestImageDataForAsset:asset options:option resultHandler:^(NSData * _Nullable imageData, NSString * _Nullable dataUTI, UIImageOrientation orientation, NSDictionary * _Nullable info) {
-                //当下载队列包含的时候，如果image为nil，则删除队列里面的下载对象
-                if ([self.downloadOrigList containsObject:imageFileName] && isNull(imageData)) {
-                    [self.downloadOrigList removeObject:imageData];
-                }
-                if (imageData) {
-                    [self.originalImageCache setObject:imageData forKey:imageFileName];
-                }
-                if (completion) {
-                    completion(imageData,imageFileName);
+            requestID = [[PHCachingImageManager defaultManager] requestImageDataForAsset:asset options:option resultHandler:^(NSData * _Nullable imageData, NSString * _Nullable dataUTI, UIImageOrientation orientation, NSDictionary * _Nullable info) {
+                BOOL finined = ![[info objectForKey:PHImageCancelledKey] boolValue] && ![info objectForKey:PHImageErrorKey] && ![[info objectForKey:PHImageResultIsDegradedKey] boolValue];
+                if (finined) {
+                    //当下载队列包含的时候，如果image为nil，则删除队列里面的下载对象
+                    if ([self.downloadOrigList containsObject:imageFileName] && isNull(imageData)) {
+                        [self.downloadOrigList removeObject:imageData];
+                    }
+                    if (imageData) {
+                        [self.originalImageCache setObject:imageData forKey:imageFileName];
+                    }
+                    if (completion) {
+                        completion(imageData,imageFileName);
+                    }
                 }
             }];
         }];

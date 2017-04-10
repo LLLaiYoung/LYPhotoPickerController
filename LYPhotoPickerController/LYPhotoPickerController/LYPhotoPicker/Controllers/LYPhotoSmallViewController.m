@@ -36,6 +36,8 @@ static PHAssetCollection *currentSelectedAssecCollection;
 @property (nonatomic, assign, getter=isPush) BOOL push;
 /** 如果是sender操作，那么在 viewWillDisappear 直接return*/
 @property (nonatomic, assign, getter=isSender) BOOL sender;
+/** 最后一个被删的indexPath，用于reloadData */
+@property (nonatomic, strong) NSIndexPath *lastIndexPath;
 
 //* --------------------------Collection Change----------------------------- */
 
@@ -56,7 +58,23 @@ static PHAssetCollection *currentSelectedAssecCollection;
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     NSArray *visiableItems = [self.smallCollectionView indexPathsForVisibleItems];
-    [self.smallCollectionView reloadItemsAtIndexPaths:visiableItems];
+    //如果visiableItems 里面包含了已经选择的对应对应的indexPath，那么就刷新对应的
+    NSMutableArray *reloadIndexPaths = [NSMutableArray array];
+    NSArray *allSelectedLYPhotoAssetObjects = [self fetchAllSelectedLYPhotoAssetObjects];
+    for (LYPhotoAssetObject *assetObject in allSelectedLYPhotoAssetObjects) {
+        NSIndexPath *indexPath = [self lyAssetObjectIndexPathWithLYPhotoAssetObject:assetObject];
+        if ([visiableItems containsObject:indexPath]) {
+            [reloadIndexPaths addObject:indexPath];
+        }
+    }
+    if (reloadIndexPaths.count != 0) {
+        [self.smallCollectionView reloadItemsAtIndexPaths:reloadIndexPaths];
+    } else {
+        if (!isNull(self.lastIndexPath)) {
+            [self.smallCollectionView reloadItemsAtIndexPaths:@[self.lastIndexPath]];
+        }
+    }
+//    [self.smallCollectionView reloadItemsAtIndexPaths:visiableItems];
     self.push = NO;
 }
 
@@ -289,6 +307,9 @@ static PHAssetCollection *currentSelectedAssecCollection;
     
     if (remove) {
         [objects removeObject:lyAssetObject];
+        if (objects.count == 0) {
+            self.lastIndexPath = [self lyAssetObjectIndexPathWithLYPhotoAssetObject:lyAssetObject];
+        }
     } else {
         /** 没包含需要添加的对象，并且没有达到最大张数 */
         if (![self selectedItemsContainLYPhotoAssetObject:lyAssetObject] && [self fetchAllSelectedLYPhotoAssetObjects].count < maxCount) {

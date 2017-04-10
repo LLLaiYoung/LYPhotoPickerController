@@ -156,7 +156,6 @@ PHPhotoLibraryChangeObserver
 
 - (void)fetchDataAndLoadVC {
     NSArray *photoList_ = [[LYPhotoHelper shareInstance] fetchAllPhotoListWithCollectionType:self.collectionType];
-//    self.photoListIdentifiers = [[LYPhotoHelper shareInstance] fetchAllListObjectIdentifierWithCollectionType:self.collectionType];
     
     NSMutableArray *listIdentifiers = [NSMutableArray array];
     for (LYPhotoListObject *listObject in photoList_) {
@@ -224,7 +223,7 @@ PHPhotoLibraryChangeObserver
         PHFetchResult *result = self.selectCollectionResultDict[key];
         PHFetchResultChangeDetails *collectionChanges = [changeInstance changeDetailsForFetchResult:result];
         if (!isNull(collectionChanges)) {
-            [self postAssetCollectionChangeNotificationWithAfterFetchResult:[collectionChanges fetchResultAfterChanges] key:key];
+            [self postAssetCollectionChangeNotificationWithCollectionChanges:collectionChanges key:key];
             //如果为0，就不发 kPhotoListChangeNotification
             if ([collectionChanges fetchResultAfterChanges].count == 0) {
                 postPhotoListChangeNotification = NO;
@@ -233,7 +232,36 @@ PHPhotoLibraryChangeObserver
     }
     
     if (!postPhotoListChangeNotification) return;
+    [self postPhotoListChangeNotification];
+}
+
+
+- (void)postAssetCollectionChangeNotificationWithCollectionChanges:(PHFetchResultChangeDetails *)collectionChanges key:(NSString *)key {
+    /** 获取当前选择collection的所有唯一标识符 */
+    NSArray *allLocalIdentifier = [[LYPhotoHelper shareInstance] fetchAllCollectionLocalIdentifierWithCollection:self.currentSelectedAssecCollection];
+    /** 获取改变了的标识符 */
+    NSArray <PHAsset *> *changeAsset = [collectionChanges changedObjects];
+    NSMutableArray *changeIdentifiers = @[].mutableCopy;
+    for (PHAsset *asset in changeAsset) {
+        [changeIdentifiers addObject:asset.localIdentifier];
+    }
+    /** 如果当前选择的所有标识符里面包含改变的，则是从icloud下载，就不应该发通知 */
+    BOOL postCollectionChangeNotification = changeIdentifiers.count == 0 ? YES : NO;
+    for (NSInteger index = 0; index < changeIdentifiers.count; index++ ) {
+        if (![allLocalIdentifier containsObject:changeIdentifiers[index]]) {
+            postCollectionChangeNotification = YES;
+            break;
+        }
+    }
     
+    if (postCollectionChangeNotification) {
+        dispatch_async_on_main_queue(^{
+            [[NSNotificationCenter defaultCenter] postNotificationName:kAssetCollectionChangeNotification object:nil userInfo:@{kAfter:[collectionChanges fetchResultAfterChanges],kKey:key}];
+        });
+    }
+}
+
+- (void)postPhotoListChangeNotification {
     NSArray *listIdentifier = [[LYPhotoHelper shareInstance] fetchAllListObjectIdentifierWithCollectionType:self.collectionType];
     
     if (listIdentifier.count != self.photoListIdentifiers.count) {
@@ -261,12 +289,6 @@ PHPhotoLibraryChangeObserver
     }
 }
 
-
-- (void)postAssetCollectionChangeNotificationWithAfterFetchResult:(PHFetchResult *)afterResult key:(NSString *)key {
-    dispatch_async_on_main_queue(^{
-        [[NSNotificationCenter defaultCenter] postNotificationName:kAssetCollectionChangeNotification object:nil userInfo:@{kAfter:afterResult,kKey:key}];
-    });
-}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

@@ -126,6 +126,9 @@ typedef NS_OPTIONS(NSUInteger, LYPhotoCollectionType) {
 /** 根据 assetCollection 获取这个相册里面所有文件的文件名 */
 - (NSArray <NSString *> *)fetchAllCollectionFilenameWithCollection:(PHAssetCollection *)assetCollection;
 
+/** 根据 assetCollection 获取这个相册里面所有文件的唯一标志符 */
+- (NSArray <NSString *> *)fetchAllCollectionLocalIdentifierWithCollection:(PHAssetCollection *)assetCollection;
+
 /** 获取所有的list的唯一标识符 */
 - (NSArray <NSString *> *)fetchAllListObjectIdentifierWithCollectionType:(LYPhotoCollectionType)collectionType;
 

@@ -12,6 +12,6 @@
 @interface LYPhotoListViewController : UIViewController
 /** 已经选择的照片的title及对应的选中张数 */
 @property (nonatomic, copy) NSDictionary <NSString *, NSNumber *> *selectedAlbumTitlesAndNumberDict;
-@property (nonatomic, strong) NSSet <NSString *> *containsPhotoListNames;
+@property (nonatomic, copy) NSSet <NSString *> *containsPhotoListNames;
 
 @end
