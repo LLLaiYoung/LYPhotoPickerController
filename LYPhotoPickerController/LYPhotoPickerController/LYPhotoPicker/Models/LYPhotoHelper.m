@@ -164,6 +164,8 @@ static CGFloat const photoCompressionQuality = 0.8;
         id cache = [self.originalImageCache objectForKey:imageFileName];
         if (![cache isKindOfClass:[UIImage class]]) {//是data
             image = [UIImage imageWithData:cache];
+        } else {
+            image = (UIImage *)cache;
         }
     } else {
         image = [self.imageCache objectForKey:imageFileName];
@@ -385,9 +387,9 @@ static CGFloat const photoCompressionQuality = 0.8;
 
 - (NSArray <LYPhotoListObject *>*)fetchAssetCollectionWithType:(PHAssetCollectionType)type subtype:(PHAssetCollectionSubtype)subtype {
     /** PHFetchOptions 的 predicate 过滤结果 */
-    PHFetchResult *smartAlbum = [PHAssetCollection fetchAssetCollectionsWithType:type subtype:subtype options:nil];
+    PHFetchResult *result = [PHAssetCollection fetchAssetCollectionsWithType:type subtype:subtype options:nil];//options 可以过滤结果
     NSMutableArray<LYPhotoListObject *> * photoList = [NSMutableArray array];
-    [smartAlbum enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull collection, NSUInteger idx, BOOL * _Nonnull stop) {
+    [result enumerateObjectsUsingBlock:^(PHAssetCollection * _Nonnull collection, NSUInteger idx, BOOL * _Nonnull stop) {
         //* 不是最近删除和视频,Recently Deleted , Videos */
         if (!([collection.localizedTitle isEqualToString:@"Recently Deleted"] || [collection.localizedTitle isEqualToString:@"Videos"] || [collection.localizedTitle isEqualToString:@"最近删除"] || [collection.localizedTitle isEqualToString:@"视频"]) ) {
             PHFetchResult * result = [self fetchResultAssetsInAssetCollection:collection ascending:NO];
@@ -482,7 +484,7 @@ static CGFloat const photoCompressionQuality = 0.8;
                 if (finined) {
                     //当下载队列包含的时候，如果image为nil，则删除队列里面的下载对象
                     if ([self.downloadOrigList containsObject:imageFileName] && isNull(imageData)) {
-                        [self.downloadOrigList removeObject:imageData];
+                        [self.downloadOrigList removeObject:imageFileName];
                     }
                     if (imageData) {
                         [self.originalImageCache setObject:imageData forKey:imageFileName];

@@ -17,7 +17,7 @@
 	4. 在 browser 界面的时候，当前所对应的list被删除（还有被选中的PHAsset对象）
 	4. 很多实现了的功能，待列出来
 
-###TODO：
+### TODO：
 * 支持 CocoaPods
 * iPad 适配
 * 原图编辑

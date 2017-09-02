@@ -93,7 +93,7 @@ typedef NS_OPTIONS(NSUInteger, LYPhotoCollectionType) {
  
  @param size 要生成图片大小(要乘屏幕比例)／原图 PHImageManagerMaximumSize
  @param resizeMode 控制照片尺寸
- @param queue 回调线程
+ @param queue 回调线程,nil 默认 mainThread
  @param small YES小图，NO大图，用于缓存
  @param completion 返回对应尺寸的image和文件名
  */
