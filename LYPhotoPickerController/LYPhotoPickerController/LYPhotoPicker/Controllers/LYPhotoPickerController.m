@@ -13,11 +13,16 @@
 #import "LYPhotoHelper.h"
 #import "LYGCD.h"
 
-NSString *const kAssetCollectionChangeNotification      = @"kAssetCollectionChangeNotification";
 NSString *const kPhotoListChangeNotification            = @"kPhotoListChangeNotification";
-NSString *const kAfter                                  = @"kAfter";
-NSString *const kKey                                    = @"kKey";
-NSString *const kDeleteIdentifier                       = @"kDeleteIdentifier";
+NSString *const kAssetCollectionChangeNotification      = @"kAssetCollectionChangeNotification";
+NSString *const kPopToListVCKey                         = @"kPopToListVCKey";
+NSString *const kAddListObjectsKey                      = @"kAddListObjectsKey";
+NSString *const kDeleteListObjectsKey                   = @"kDeleteListObjectsKey";
+NSString *const KChangeAssetCollectionIdentifiersKey    = @"KChangeAssetCollectionIdentifiersKey";
+NSString *const kSelectedDeleteObjectIdentifiersKey     = @"kSelectedDeleteObjectIdentifiersKey";
+NSString *const kCollectionDeleteObjectIdentifiersKey   = @"kCollectionDeleteObjectIdentifiersKey";
+NSString *const kCollectionAddObjectIdentifiersKey      = @"kCollectionAddObjectIdentifiersKey";
+NSString *const kNeedReloadDataKey                      = @"kNeedReloadDataKey";
 
 
 NSString *const KVC_CurrentSelectedAssecCollection  = @"currentSelectedAssecCollection";
@@ -29,17 +34,11 @@ NSString *const KVC_PhotoListIdentifiers            = @"photoListIdentifiers";
 <
 PHPhotoLibraryChangeObserver
 >
-/** 外界不用关心这个属性，相册改变
-    1、key:localIdentifier value:PHFetchResult
-    2、在哪几个 PHFetchResult 中选择了（包含当前进入的PHFetchResult(不管选择还是没选择)）
-    3、在list 界面push 到 small 的时候就应该讲当前选择的fetchResult加入到selectCollectionResultDict
-    4、在small控制器 willDisAppear 的时候就应该要检查一下，是否需要将这个对象移除（如果对应的collection 中没有选择任何对象，则当前对象移除，反之，如果选择了，就不移除。
-    5、当收到 photoLibraryDidChange 通知的时候遍历 selectCollectionResults 发通知
- */
-@property (nonatomic, strong)  NSMutableDictionary <NSString *,PHFetchResult *> *selectCollectionResultDict;
 
-/** 外界不用关心这个属性，相册改变，当前选择的 PHAssetCollection，用于获取当前PHAssetCollection内容 */
-@property (nonatomic, strong) PHAssetCollection *currentSelectedAssecCollection;
+@property (nonatomic, strong) NSMutableDictionary <NSString */*photoListObject.localIdentifier*/,NSMutableArray <LYPhotoAssetObject *> *> *selectedItemInfo;
+
+/** 记录 AssetCollection 改变 */
+@property (nonatomic, strong) NSMutableDictionary <NSString */*listObjectIdentifier*/,NSArray <NSString */*listObject对应集合里面的LYPhotoAssetObject.identifier.*/>*> *currentSelectedListInfo;
 
 /** 相册改变，存所有list的identifier，当 list 个数发生改变 找到被删的，如果是新增的话就发空对象（不包含元素的对象），在收到通知的时候，如果收到的对象不为空的话，就遍历处理，为空的话就不刷新 */
 @property (nonatomic, strong) NSArray <NSString *> *photoListIdentifiers;
@@ -60,10 +59,12 @@ PHPhotoLibraryChangeObserver
         _supportMultiSelect = YES;
         _markType = LYPhotoListSelectMarkTypeNumber;
         _collectionType = LYPhotoCollectionTypeAlbum|LYPhotoCollectionTypeSmartAlbum;
-        _selectCollectionResultDict = [NSMutableDictionary dictionary];
+        _selectedItemInfo = [NSMutableDictionary dictionary];
+        _currentSelectedListInfo = [NSMutableDictionary dictionary];
+        
         _lineCount = 3;
         _spacing = 5.0f;
-        _cacheCount = 50;
+        _cacheTotalCostLimit = 0;
     }
     return self;
 }
@@ -77,8 +78,6 @@ PHPhotoLibraryChangeObserver
 
 - (void)dealloc {
     [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
-    _selectCollectionResultDict = nil;
-    _currentSelectedAssecCollection = nil;
 }
 
 #pragma mark - Private Methods
@@ -121,19 +120,6 @@ PHPhotoLibraryChangeObserver
 
 - (void)registerNotification {
     [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
-}
-
-/** 缓存所有list对象里面的assecCollection对象的文件名 */
-- (void)cacheAllImageFileNamesWithSelectedListObject:(LYPhotoListObject *)list_ allPhotoList:(NSMutableArray <LYPhotoListObject *>*)photoLists {
-    //* 当前的在主线程缓存 */
-    [[LYPhotoHelper shareInstance] updateAllImageFilenamesWithLYPhotoListObject:list_];
-    [photoLists removeObject:list_];
-    //* 其余的在全局队列缓存 */
-    for (LYPhotoListObject *listObject in photoLists) {
-        [LYGCDQueue executeInGlobalQueue:^{
-            [[LYPhotoHelper shareInstance] updateAllImageFilenamesWithLYPhotoListObject:listObject];
-        }];
-    }
 }
 
 /** 请求权限 */
@@ -195,18 +181,15 @@ PHPhotoLibraryChangeObserver
         list_ = photoList_.firstObject;
     }
     
-    [self cacheAllImageFileNamesWithSelectedListObject:list_ allPhotoList:photoList_.mutableCopy];
-    
     smallVC.smallTitle = list_.photoTitle;
     [MBProgressHUD showLargeHUD:@"正在加载..."];
     @weakify(self)
     [LYGCDQueue executeInGlobalQueue:^{
         smallVC.fetchLYSmallAsset = [[LYPhotoHelper shareInstance] fetchLYPhotoAssetObjectInAssetCollection:list_.assetCollection ascending:YES];
+        self.currentSelectedListInfo[list_.listIdentifier] = [[LYPhotoHelper shareInstance] fetchImageDataInAsset:<#(PHAsset *)#> makeResizeMode:<#(PHImageRequestOptionsResizeMode)#> callBackQueue:<#(dispatch_queue_t)#> completion:<#^(NSData *assetImageData, NSString *imageFileName)completion#>]
         dispatch_async_on_main_queue(^{
             [MBProgressHUD dismissHUD];
             @strongify(self)
-            self.selectCollectionResultDict[list_.listIdentifier] = list_.result;
-            self.currentSelectedAssecCollection = list_.assetCollection;
             self.viewControllers = @[listVC,smallVC];
         });
     }];
@@ -242,81 +225,7 @@ PHPhotoLibraryChangeObserver
 #pragma mark - Change Handling
 
 - (void)photoLibraryDidChange:(PHChange *)changeInstance {
-    BOOL postPhotoListChangeNotification = YES;
-    for (NSString *key in self.selectCollectionResultDict.allKeys) {
-        PHFetchResult *result = self.selectCollectionResultDict[key];
-        PHFetchResultChangeDetails *collectionChanges = [changeInstance changeDetailsForFetchResult:result];
-        if (!isNull(collectionChanges)) {
-            [self postAssetCollectionChangeNotificationWithCollectionChanges:collectionChanges key:key];
-            //如果为0，就不发 kPhotoListChangeNotification
-            if ([collectionChanges fetchResultAfterChanges].count == 0) {
-                postPhotoListChangeNotification = NO;
-            }
-        }
-    }
-    
-    if (!postPhotoListChangeNotification) return;
-    [self postPhotoListChangeNotification];
-}
-
-
-- (void)postAssetCollectionChangeNotificationWithCollectionChanges:(PHFetchResultChangeDetails *)collectionChanges key:(NSString *)key {
-    /** 获取当前选择collection的所有唯一标识符 */
-    NSArray *allLocalIdentifier = [[LYPhotoHelper shareInstance] fetchAllCollectionLocalIdentifierWithCollection:self.currentSelectedAssecCollection];
-    
-    /** 获取改变了的标识符 */
-    NSArray <PHAsset *> *changeAsset = [collectionChanges changedObjects];
-    NSMutableArray *changeIdentifiers = @[].mutableCopy;
-    for (PHAsset *asset in changeAsset) {
-        NSString *imageFileName = [asset valueForKey:@"filename"];
-        [[LYPhotoHelper shareInstance] updateAllImageFilenamesWithKey:key imageFileName:imageFileName];
-        [changeIdentifiers addObject:asset.localIdentifier];
-    }
-    /** 如果当前选择的所有标识符里面包含改变的，则是从icloud下载，就不应该发通知 */
-    BOOL postCollectionChangeNotification = changeIdentifiers.count == 0 ? YES : NO;
-    for (NSInteger index = 0; index < changeIdentifiers.count; index++ ) {
-        if (![allLocalIdentifier containsObject:changeIdentifiers[index]]) {
-            postCollectionChangeNotification = YES;
-            break;
-        }
-    }
-    
-    if (postCollectionChangeNotification) {
-        dispatch_async_on_main_queue(^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:kAssetCollectionChangeNotification object:nil userInfo:@{kAfter:[collectionChanges fetchResultAfterChanges],kKey:key}];
-        });
-    }
-}
-
-- (void)postPhotoListChangeNotification {
-    NSArray *listIdentifier = [[LYPhotoHelper shareInstance] fetchAllListObjectIdentifierWithCollectionType:self.collectionType];
-    
-    if (listIdentifier.count != self.photoListIdentifiers.count) {
-        //找到被删的／新增的
-        NSMutableSet *set1 = [NSMutableSet setWithArray:listIdentifier];
-        NSMutableSet *set2 = [NSMutableSet setWithArray:self.photoListIdentifiers];
-        [set2 minusSet:set1];
-        NSMutableSet *set3 = [NSMutableSet setWithArray:self.photoListIdentifiers];
-        [set1 minusSet:set3];
-        [set2 unionSet:set1];
-        
-        BOOL add = NO;
-        for (NSString *identifier in set2) {
-            if (![self.photoListIdentifiers containsObject:identifier]) {//不包含就是新增
-                add = YES;
-            }
-        }
-        self.photoListIdentifiers = listIdentifier;
-        if (add) {
-            [set2 removeAllObjects];
-        }
-        
-        [[LYPhotoHelper shareInstance] cacheAllFileName];
-        
-        dispatch_async_on_main_queue(^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:kPhotoListChangeNotification object:nil userInfo:@{kDeleteIdentifier:set2}];
-        });
-    }
+   
 }
 
 

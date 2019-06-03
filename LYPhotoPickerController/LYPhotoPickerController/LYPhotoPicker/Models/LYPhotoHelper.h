@@ -97,12 +97,12 @@ typedef NS_OPTIONS(NSUInteger, LYPhotoCollectionType) {
  @param small YES小图，NO大图，用于缓存
  @param completion 返回对应尺寸的image和文件名
  */
--(void)fetchImageInAsset:(PHAsset *)asset
-                makeSize:(CGSize)size
-          makeResizeMode:(PHImageRequestOptionsResizeMode)resizeMode
-           callBackQueue:(dispatch_queue_t)queue
-              smallImage:(BOOL)small
-              completion:(void (^)(UIImage *assetImage,NSString *imageFileName))completion;
+-(void)fetchImageForAsset:(PHAsset *)asset
+               targetSize:(CGSize)size
+               resizeMode:(PHImageRequestOptionsResizeMode)resizeMode
+            callBackQueue:(dispatch_queue_t)queue
+               smallImage:(BOOL)small
+               completion:(void (^)(UIImage *assetImage,NSString *imageFileName))completion;
 
 
 /**
@@ -112,10 +112,13 @@ typedef NS_OPTIONS(NSUInteger, LYPhotoCollectionType) {
  @param queue 回调线程
  @param completion 返回对应的imageData和文件名
  */
--(void)fetchImageDataInAsset:(PHAsset *)asset
-              makeResizeMode:(PHImageRequestOptionsResizeMode)resizeMode
-               callBackQueue:(dispatch_queue_t)queue
-                  completion:(void (^)(NSData *assetImageData,NSString *imageFileName))completion;
+-(void)fetchImageDataForAsset:(PHAsset *)asset
+                   resizeMode:(PHImageRequestOptionsResizeMode)resizeMode
+                callBackQueue:(dispatch_queue_t)queue
+                   completion:(void (^)(NSData *assetImageData,NSString *imageFileName))completion;
+
+
+- (NSArray <LYPhotoAssetObject *>*)fetchLYPhotoAssetObjectInAssetCollection:(PHAssetCollection *)assetCollection;
 
 /** 获取指定相册的所有照片 */
 - (NSArray <LYPhotoAssetObject *>*)fetchLYPhotoAssetObjectInAssetCollection:(PHAssetCollection *)assetCollection ascending:(BOOL)ascending;

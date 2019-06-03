@@ -30,7 +30,7 @@
 //    photoPicker.saveSelected = NO;
     photoPicker.lineCount = 3;
     photoPicker.spacing = 3.0f;
-    photoPicker.markType = LYPhotoListSelectMarkTypeRedDot;
+    photoPicker.markType = LYPhotoListSelectMarkTypeNumber;
     [self presentViewController:photoPicker animated:YES completion:nil];
 }
 

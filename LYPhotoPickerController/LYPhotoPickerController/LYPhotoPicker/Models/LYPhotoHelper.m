@@ -148,9 +148,9 @@ static CGFloat const photoCompressionQuality = 0.8;
     return result;
 }
 
--(void)fetchImageInAsset:(PHAsset *)asset
-                makeSize:(CGSize)size
-          makeResizeMode:(PHImageRequestOptionsResizeMode)resizeMode
+-(void)fetchImageForAsset:(PHAsset *)asset
+                targetSize:(CGSize)size
+          resizeMode:(PHImageRequestOptionsResizeMode)resizeMode
            callBackQueue:(dispatch_queue_t)queue
               smallImage:(BOOL)small
               completion:(void (^)(UIImage *assetImage,NSString *imageFileName))completion {
@@ -199,10 +199,10 @@ static CGFloat const photoCompressionQuality = 0.8;
     }
 }
 
--(void)fetchImageDataInAsset:(PHAsset *)asset
-              makeResizeMode:(PHImageRequestOptionsResizeMode)resizeMode
-               callBackQueue:(dispatch_queue_t)queue
-                  completion:(void (^)(NSData *assetImageData,NSString *imageFileName))completion {
+-(void)fetchImageDataForAsset:(PHAsset *)asset
+                   resizeMode:(PHImageRequestOptionsResizeMode)resizeMode
+                callBackQueue:(dispatch_queue_t)queue
+                   completion:(void (^)(NSData *assetImageData,NSString *imageFileName))completion {
     if (isNull(asset) || queue == NULL) {
         return;
     }
@@ -227,6 +227,10 @@ static CGFloat const photoCompressionQuality = 0.8;
             }
         }];
     }
+}
+
+- (NSArray <LYPhotoAssetObject *>*)fetchLYPhotoAssetObjectInAssetCollection:(PHAssetCollection *)assetCollection {
+    return [self fetchLYPhotoAssetObjectInAssetCollection:assetCollection ascending:YES];
 }
 
 /** 可优化，线程应该放在这里面来写 */
@@ -641,11 +645,7 @@ static NSInteger queueIndex = 0;
 - (NSCache *)imageCache {
     if (!_imageCache) {
         _imageCache = [[NSCache alloc] init];
-        if ([UIViewController photoPickerController].cacheCount != 50) {
-            _imageCache.countLimit = [UIViewController photoPickerController].cacheCount;
-        } else {
-            _imageCache.countLimit = 50;
-        }
+        _imageCache.totalCostLimit = [UIViewController photoPickerController].cacheTotalCostLimit;
     }
     return _imageCache;
 }
@@ -653,11 +653,7 @@ static NSInteger queueIndex = 0;
 - (NSCache *)originalImageCache {
     if (!_originalImageCache) {
         _originalImageCache = [[NSCache alloc] init];
-        if ([UIViewController photoPickerController].cacheCount != 50) {
-            _originalImageCache.countLimit = [UIViewController photoPickerController].cacheCount;
-        } else {
-            _originalImageCache.countLimit = 50;
-        }
+        _originalImageCache.totalCostLimit = [UIViewController photoPickerController].cacheTotalCostLimit;
     }
     return _originalImageCache;
 }
